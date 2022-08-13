@@ -1,0 +1,42 @@
+name: dev
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: scp
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEV_REMOTE_HOST }}
+          password: ${{ secrets.DEV_REMOTE_PASSWORD }}
+          username: ${{ secrets.DEV_REMOTE_USERNAME }}
+          port: ${{ secrets.DEV_REMOTE_PORT }}
+
+          source: "./*"
+          target: ${{ secrets.DEV_REMOTE_TARGET }}
+
+      - name: ssh exec
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_REMOTE_HOST }}
+          password: ${{ secrets.DEV_REMOTE_PASSWORD }}
+          username: ${{ secrets.DEV_REMOTE_USERNAME }}
+          port: ${{ secrets.DEV_REMOTE_PORT }}
+
+          script: |
+            cd ${{ secrets.DEV_REMOTE_TARGET }}
+            cat demo.txt
+            
+            docker stop ${{ secrets.DEV_DOCKER_NAME }}
+            docker rm ${{ secrets.DEV_DOCKER_NAME }}
+            docker rmi ${{ secrets.DEV_DOCKER_NAME }}
+            docker build -t ${{ secrets.DEV_DOCKER_NAME }} .
+            
+            docker run -itd --name ${{ secrets.DEV_DOCKER_NAME }}  -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -p ${{ secrets.DEV_PROJECT_PORT }}:8081 ${{ secrets.DEV_DOCKER_NAME }}

@@ -1,0 +1,7 @@
+server:
+  port: 8081
+  gin_mode: debug # debug,release,test
+
+database:
+  path: /home/project/meido-anime-server/meido-anime.db
+  max_cons: 10
