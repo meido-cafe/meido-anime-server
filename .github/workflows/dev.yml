@@ -21,6 +21,7 @@ jobs:
 
           source: "./*"
           target: ${{ secrets.DEV_REMOTE_TARGET }}
+          rm: true
 
       - name: ssh exec
         uses: appleboy/ssh-action@master
