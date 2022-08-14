@@ -21,7 +21,9 @@ func (this *RssApi) GetMikanInfo(ctx *gin.Context) {
 		model.BadBind(ctx)
 		return
 	}
-	if req.SubjectName == "" {
+
+	switch {
+	case req.SubjectName == "":
 		model.Bad(ctx, "番剧名称不能为空")
 		return
 	}
@@ -29,6 +31,51 @@ func (this *RssApi) GetMikanInfo(ctx *gin.Context) {
 	res, err := this.service.GetInfoMikan(req)
 	if err != nil {
 		model.Error(ctx, "获取番剧mikan信息失败", err.Error())
+		return
+	}
+	model.Data(ctx, res)
+}
+
+func (this *RssApi) GetSearch(ctx *gin.Context) {
+	req := vo.GetSearchRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		model.BadBind(ctx)
+		return
+	}
+
+	switch {
+	case req.SubjectName == "":
+		model.Bad(ctx, "番剧名称不能为空")
+		return
+	}
+
+	res, err := this.service.GetSearch(req)
+	if err != nil {
+		model.Error(ctx, "获取rss信息失败", err.Error())
+		return
+	}
+	model.Data(ctx, res)
+}
+
+func (this *RssApi) GetSubject(ctx *gin.Context) {
+	req := vo.GetSubjectRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		model.BadBind(ctx)
+		return
+	}
+
+	switch {
+	case req.MikanId == 0:
+		model.Bad(ctx, "mikan 番剧id不能为空")
+		return
+	case req.MikanGroupId == 0:
+		model.Bad(ctx, "mikan 字幕组id不能为空")
+		return
+	}
+
+	res, err := this.service.GetSubject(req)
+	if err != nil {
+		model.Error(ctx, "获取rss信息失败", err.Error())
 		return
 	}
 	model.Data(ctx, res)

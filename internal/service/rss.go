@@ -4,6 +4,7 @@ import (
 	"github.com/gocolly/colly/v2"
 	"log"
 	"meido-anime-server/internal/model/vo"
+	"meido-anime-server/internal/pkg"
 	"meido-anime-server/internal/repo"
 	"net/url"
 	"strconv"
@@ -51,5 +52,27 @@ func (this *RssService) GetInfoMikan(request vo.GetInfoMikanRequest) (response v
 		log.Println(err)
 		return
 	}
+	return
+}
+
+func (this *RssService) GetSearch(request vo.GetSearchRequest) (response vo.GetSearchResponse, err error) {
+	response.Url = "https://mikanani.me/RSS/Search?searchstr=" + url.QueryEscape(request.SubjectName)
+	response.Feed, err = pkg.Parse(response.Url)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
+}
+
+func (this *RssService) GetSubject(request vo.GetSubjectRequest) (response vo.GetSubjectResponse, err error) {
+	response.Url = "https://mikanani.me/RSS/Bangumi?bangumiId=" + strconv.Itoa(int(request.MikanId)) + "&subgroupid=" + strconv.Itoa(int(request.MikanGroupId))
+	response.Feed, err = pkg.Parse(response.Url)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	return
 }

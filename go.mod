@@ -7,6 +7,7 @@ require (
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/google/wire v0.5.0
 	github.com/mattn/go-sqlite3 v1.14.14
+	github.com/mmcdole/gofeed v1.1.3
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -28,6 +29,7 @@ require (
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mmcdole/goxpp v0.0.0-20181012175147-0068e33feabf // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.2 // indirect
