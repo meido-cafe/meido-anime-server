@@ -23,22 +23,22 @@ func NewDB() *sql.DB {
 	return db
 }
 
-// Injectors from demo.go:
+// Injectors from rss.go:
 
-func NewDemoRepo() repo.IDemoRepo {
+func NewRssRepo() repo.RssInterface {
 	db := NewDB()
-	iDemoRepo := repo.NewDemoRepo(db)
-	return iDemoRepo
+	rssInterface := repo.NewRssRepo(db)
+	return rssInterface
 }
 
-func NewDemoService() *service.DemoService {
-	iDemoRepo := NewDemoRepo()
-	demoService := service.NewDemoService(iDemoRepo)
-	return demoService
+func NewRssService() *service.RssService {
+	rssInterface := NewRssRepo()
+	rssService := service.NewRssService(rssInterface)
+	return rssService
 }
 
-func NewDemoHander() *v1.DemoHandler {
-	demoService := NewDemoService()
-	demoHandler := v1.NewDemoHandler(demoService)
-	return demoHandler
+func NewRssApi() *v1.RssApi {
+	rssService := NewRssService()
+	rssApi := v1.NewRssApi(rssService)
+	return rssApi
 }

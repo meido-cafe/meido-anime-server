@@ -10,26 +10,26 @@ import (
 	"meido-anime-server/internal/service"
 )
 
-func NewDemoRepo() (ret repo.IDemoRepo) {
+func NewRssRepo() (ret repo.RssInterface) {
 	panic(wire.Build(
 		NewDB,
-		repo.NewDemoRepo,
+		repo.NewRssRepo,
 	))
 	return
 }
 
-func NewDemoService() (ret *service.DemoService) {
+func NewRssService() (ret *service.RssService) {
 	panic(wire.Build(
-		NewDemoRepo,
-		service.NewDemoService,
+		NewRssRepo,
+		service.NewRssService,
 	))
 	return
 }
 
-func NewDemoHander() (ret *v1.DemoHandler) {
+func NewRssApi() (ret *v1.RssApi) {
 	panic(wire.Build(
-		NewDemoService,
-		v1.NewDemoHandler,
+		NewRssService,
+		v1.NewRssApi,
 	))
 	return
 }
