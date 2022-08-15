@@ -9,6 +9,8 @@ ENV GO111MODULE=on \
 WORKDIR /build
 COPY . .
 
+RUN go env -w GO111MODULE=on
+RUN go env -w GOPROXY=https://goproxy.cn,direct
 RUN go build -ldflags="-s -w" -trimpath -o app .
 
 
