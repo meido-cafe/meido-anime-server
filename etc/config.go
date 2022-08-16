@@ -32,7 +32,7 @@ var configOnce sync.Once
 func marshal(filename string) {
 	var err error
 
-	byt, err := ioutil.ReadFile(pkg.NewPath().Join(".").Join(".").Join("etc").Join(filename + ".yaml").String())
+	byt, err := ioutil.ReadFile(pkg.NewPath().Join(".").Join("etc").Join(filename + ".yaml").String())
 	if err != nil {
 		panic(err)
 	}

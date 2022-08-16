@@ -2,10 +2,10 @@ package repo
 
 import "database/sql"
 
-type Rss struct {
+type RssRepo struct {
 	db *sql.DB
 }
 
 func NewRssRepo(db *sql.DB) RssInterface {
-	return &Rss{db: db}
+	return &RssRepo{db: db}
 }

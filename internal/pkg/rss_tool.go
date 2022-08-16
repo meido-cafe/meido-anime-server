@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func Parse(url string) (ret model.Feed, err error) {
+func ParseRss(url string) (ret model.Feed, err error) {
 	parser := gofeed.NewParser()
 	feed, err := parser.ParseURL(url)
 	if err != nil {
