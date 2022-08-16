@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"meido-anime-server/etc"
 	"meido-anime-server/internal/api"
 	"meido-anime-server/internal/app"
 )
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
 	etc.InitConfig()
 	app.InitDB()
 	engine, router := app.NewGin()
