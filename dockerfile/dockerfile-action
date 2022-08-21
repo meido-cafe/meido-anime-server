@@ -1,0 +1,18 @@
+FROM alpine
+
+# 时区
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN apk add tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
+COPY app /
+COPY etc/* /etc
+COPY meido-anime.db /
+
+# nas-anime的web端口
+ENV QB_WEB_URL=http://localhost:8081
+ENV QB_USERNAME=admin
+ENV QB_PASSWORD=adminadmin
+
+ENTRYPOINT ["/app"]

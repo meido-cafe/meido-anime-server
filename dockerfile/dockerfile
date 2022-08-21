@@ -7,7 +7,7 @@ ENV GO111MODULE=on \
     GOPROXY=https://goproxy.cn
 
 WORKDIR /build
-COPY . .
+COPY .. .
 
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o app .
 
@@ -21,10 +21,10 @@ RUN apk add tzdata && \
     echo "Asia/Shanghai" > /etc/timezone
 
 COPY --from=builder /build/app /
-COPY etc/common.yaml /etc/
-COPY etc/dev.yaml /etc/
-COPY etc/pro.yaml /etc/
-COPY meido-anime.db /
+COPY ../etc/common.yaml /etc/
+COPY ../etc/dev.yaml /etc/
+COPY ../etc/pro.yaml /etc/
+COPY ../meido-anime.db /
 
 # nas-anime的web端口
 ENV QB_WEB_URL=http://localhost:8081

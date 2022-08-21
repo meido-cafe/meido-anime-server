@@ -16,30 +16,36 @@ jobs:
         with:
           go-version: '1.18'
 
-      - name: go build
-        run: go build .
+      - name: Set up GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: latest
+          platform: x64
 
-      #      - name: scp
-      #        uses: appleboy/scp-action@master
-      #        with:
-      #          host: ${{ secrets.DEV_REMOTE_HOST }}
-      #          password: ${{ secrets.DEV_REMOTE_PASSWORD }}
-      #          username: ${{ secrets.DEV_REMOTE_USERNAME }}
-      #          port: ${{ secrets.DEV_REMOTE_PORT }}
-      #
-      #          source: "./*"
-      #          target: ${{ secrets.DEV_REMOTE_TARGET }}
-      #          rm: true
+      - name: go build
+        run: CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o app .
 
       - name: scp
-        uses: easingthemes/ssh-deploy@v2.0.8
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEV_REMOTE_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.DEV_REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.DEV_REMOTE_USERNAME }}
-          SOURCE: '/'
-          TARGET: ${{ secrets.DEV_REMOTE_TARGET }}
-          ARGS: '-avzr --delete'
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEV_REMOTE_HOST }}
+          password: ${{ secrets.DEV_REMOTE_PASSWORD }}
+          username: ${{ secrets.DEV_REMOTE_USERNAME }}
+          port: ${{ secrets.DEV_REMOTE_PORT }}
+
+          source: "etc,meido-anime.db,app"
+          target: ${{ secrets.DEV_REMOTE_TARGET }}
+          rm: true
+      #
+      #      - name: scp
+      #        uses: easingthemes/ssh-deploy@v2.0.8
+      #        env:
+      #          SSH_PRIVATE_KEY: ${{ secrets.DEV_REMOTE_SSH_KEY }}
+      #          REMOTE_HOST: ${{ secrets.DEV_REMOTE_HOST }}
+      #          REMOTE_USER: ${{ secrets.DEV_REMOTE_USERNAME }}
+      #          SOURCE: '/'
+      #          TARGET: ${{ secrets.DEV_REMOTE_TARGET }}
+      #          ARGS: '-avzr --delete'
 
       - name: ssh exec
         uses: appleboy/ssh-action@master
@@ -55,6 +61,6 @@ jobs:
             docker stop ${{ secrets.DEV_DOCKER_NAME }}
             docker rm ${{ secrets.DEV_DOCKER_NAME }}
             docker rmi ${{ secrets.DEV_DOCKER_NAME }}
-            docker build -t ${{ secrets.DEV_DOCKER_NAME }} .
+            docker build -t ${{ secrets.DEV_DOCKER_NAME }} -f ./dockerfile/dockerfile-action
             
             docker run -itd --name ${{ secrets.DEV_DOCKER_NAME }}  -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -p ${{ secrets.DEV_PROJECT_PORT }}:8081 ${{ secrets.DEV_DOCKER_NAME }}
