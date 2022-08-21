@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.DEV_REMOTE_USERNAME }}
           port: ${{ secrets.DEV_REMOTE_PORT }}
 
-          source: "etc,meido-anime.db,app"
+          source: "etc,meido-anime.db,app,dockerfile/dockerfile-action"
           target: ${{ secrets.DEV_REMOTE_TARGET }}
           rm: true
       #

@@ -26,8 +26,8 @@ func (p *Page) Data() (limit, offset int) {
 }
 
 type Time struct {
-	CreateTime int64 `json:"create_time"`
-	UpdateTime int64 `json:"update_time"`
+	CreateTime int64 `json:"create_time" db:"create_time"`
+	UpdateTime int64 `json:"update_time" db:"update_time"`
 }
 
 type Feed struct {

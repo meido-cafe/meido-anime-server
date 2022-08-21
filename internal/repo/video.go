@@ -2,20 +2,21 @@ package repo
 
 import (
 	"context"
-	"database/sql"
 	"errors"
+	"github.com/jmoiron/sqlx"
+	"log"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
 	tool "meido-anime-server/pkg"
 	"strings"
 )
 
-func NewVideoRepo(db *sql.DB) VideoInterface {
+func NewVideoRepo(db *sqlx.DB) VideoInterface {
 	return &VideoRepo{db: db}
 }
 
 type VideoRepo struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
 func (this *VideoRepo) getFields() string {
@@ -37,6 +38,7 @@ func (this *VideoRepo) getFields() string {
 func (this *VideoRepo) SelectOne(ctx context.Context, id int64, bangumiId int64) (res model.Video, err error) {
 	if id <= 0 && bangumiId <= 0 {
 		err = errors.New("参数错误")
+		log.Println(err)
 		return
 	}
 	q := tool.NewQuery()
@@ -49,15 +51,9 @@ func (this *VideoRepo) SelectOne(ctx context.Context, id int64, bangumiId int64)
 		sql += ` and bangumi_id = ? `
 		q.Add(bangumiId)
 	}
-	ret, err := this.db.Query(sql, q.Values()...)
-	if err != nil {
+	if err = this.db.Get(&res, sql, q.Values()...); err != nil {
+		log.Println(err)
 		return
-	}
-	defer ret.Close()
-	if ret.Next() {
-		if err = ret.Scan(&res); err != nil {
-			return
-		}
 	}
 	return
 }
@@ -86,7 +82,7 @@ func (this *VideoRepo) InsertOne(ctx context.Context, video model.Video) (err er
 }
 
 func (this *VideoRepo) SelectList(ctx context.Context, req vo.VideoGetListRequest) (res []model.Video, total int64, err error) {
-	tx, err := this.db.Begin()
+	tx, err := this.db.Beginx()
 	if err != nil {
 		return
 	}
@@ -140,40 +136,22 @@ func (this *VideoRepo) SelectList(ctx context.Context, req vo.VideoGetListReques
 		querySQL += ` limit ? offset ? `
 	}
 
-	query, err := tx.Query(querySQL, q.Values()...)
-	if err != nil {
+	if err = tx.Select(&res, querySQL, q.Values()...); err != nil {
+		log.Println(err)
 		return
-	}
-	defer query.Close()
-
-	var video model.Video
-	for query.Next() {
-		if er := query.Scan(
-			&video.Id,
-			&video.BangumiId,
-			&video.Title,
-			&video.Season,
-			&video.Cover,
-			&video.Total,
-			&video.RssUrl,
-			&video.PlayTime,
-			&video.CreateTime,
-			&video.UpdateTime,
-		); er != nil {
-			err = er
-			return
-		}
-		res = append(res, video)
 	}
 
 	if countQuery.Next() {
-		if er := countQuery.Scan(&total); er != nil {
-			err = er
+		if err = countQuery.Scan(&total); err != nil {
+			log.Println(err)
 			return
 		}
 	}
 
-	err = tx.Commit()
+	if err = tx.Commit(); err != nil {
+		log.Println(err)
+		return
+	}
 	return
 }
 

@@ -1,11 +1,13 @@
 package repo
 
-import "database/sql"
+import (
+	"github.com/jmoiron/sqlx"
+)
 
 type RssRepo struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func NewRssRepo(db *sql.DB) RssInterface {
+func NewRssRepo(db *sqlx.DB) RssInterface {
 	return &RssRepo{db: db}
 }

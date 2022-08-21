@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
+	"log"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/repo"
 	"meido-anime-server/pkg"
-	"meido-anime-server/pkg/logger"
 	"strings"
 	"time"
 )
@@ -24,7 +24,8 @@ type VideoService struct {
 func (this *VideoService) GetOne(request vo.VideoGetOneRequest) (ret model.Video, err error) {
 	ret, err = this.repo.SelectOne(context.TODO(), request.Id, request.BangumiId)
 	if err != nil {
-		logger.Error(err)
+		log.Println("获取番剧信息失败")
+		return
 	}
 	return
 }
@@ -43,12 +44,12 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 		}
 		if matchStr == "" {
 			season = 1
-			logger.Info("没有从", request.Title, "中获取季相关信息,已设置为默认的第一季")
+			log.Println("没有从", request.Title, "中获取季相关信息,已设置为默认的第一季")
 		} else {
 			old := request.Title
 			request.Title = strings.ReplaceAll(request.Title, matchStr, "")
 			request.Title = strings.TrimSpace(request.Title)
-			logger.Info(old, " 重命名为 ==> ", request.Title)
+			log.Println(old, " 重命名为 ==> ", request.Title)
 		}
 	}
 
@@ -69,17 +70,17 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 	}
 
 	if err = this.repo.InsertOne(context.TODO(), data); err != nil {
-		logger.Error(err)
+		log.Println(err)
 		return
 	}
-	logger.Infof(`[bangumi:%d][%s][第%d季] 添加成功`, request.BangumiId, request.Title, season)
+	log.Printf(`[bangumi:%d][%s][第%d季] 添加成功`, request.BangumiId, request.Title, season)
 	return
 }
 
 func (this *VideoService) GetList(request vo.VideoGetListRequest) (response vo.VideoGetListResponse, err error) {
 	list, total, err := this.repo.SelectList(context.TODO(), request)
 	if err != nil {
-		logger.Error(err)
+		log.Println(err)
 		return
 	}
 	response.Items = list
@@ -90,7 +91,7 @@ func (this *VideoService) GetList(request vo.VideoGetListRequest) (response vo.V
 func (this *VideoService) DeleteRss(request vo.DeleteRssRequest) (err error) {
 	err = this.repo.UpdateRss(context.TODO(), request.Id, "")
 	if err != nil {
-		logger.Error(err)
+		log.Println(err)
 	}
 	return
 
@@ -98,7 +99,7 @@ func (this *VideoService) DeleteRss(request vo.DeleteRssRequest) (err error) {
 func (this *VideoService) UpdateRss(request vo.UpdateRssRequest) (err error) {
 	err = this.repo.UpdateRss(context.TODO(), request.Id, request.Rss)
 	if err != nil {
-		logger.Error(err)
+		log.Println(err)
 	}
 	return
 }

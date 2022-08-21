@@ -1,9 +1,9 @@
 package global
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"sync"
 )
 
-var DB *sql.DB
+var DB *sqlx.DB
 var DBOnce sync.Once

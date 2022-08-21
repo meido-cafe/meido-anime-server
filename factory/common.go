@@ -4,13 +4,13 @@
 package factory
 
 import (
-	"database/sql"
 	"github.com/google/wire"
+	"github.com/jmoiron/sqlx"
 	"meido-anime-server/etc"
 	"meido-anime-server/internal/app"
 )
 
-func NewDB() (ret *sql.DB) {
+func NewDB() (ret *sqlx.DB) {
 	panic(wire.Build(
 		etc.NewConfig,
 		app.NewDB,

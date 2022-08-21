@@ -46,8 +46,12 @@ func (this *VideoApi) GetOne(ctx *gin.Context) {
 		response.Bad(ctx, "缺少参数")
 		return
 	}
-	this.service.GetOne(req)
-	response.Data(ctx, nil)
+	res, err := this.service.GetOne(req)
+	if err != nil {
+		response.Error(ctx, "查询失败")
+		return
+	}
+	response.Data(ctx, res)
 }
 
 // 有bangumi 订阅rss
