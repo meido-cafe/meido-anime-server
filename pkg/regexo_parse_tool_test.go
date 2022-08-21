@@ -51,29 +51,29 @@ func TestGetSeason(t *testing.T) {
 		title string
 	}
 	tests := []struct {
-		name       string
-		args       args
-		wantSeason int64
-		wantStatus int
-		wantErr    bool
+		name         string
+		args         args
+		wantSeason   int64
+		wantMatchStr string
+		wantErr      bool
 	}{
-		{"<10", args{title: "OVERLORD 第四季"}, 4, 0, false},
-		{"无空格", args{title: "OVERLORD第四季"}, 1, 1, false},
-		{"无数字", args{title: "OVERLORD 第季"}, 1, 1, false},
-		{"10+", args{title: "OVERLORD 第十三季"}, 13, 0, false},
-		{">20", args{title: "OVERLORD 第三十四季"}, 34, 0, false},
-		{"季信息格式错误", args{title: "OVERLORD 第三四二季"}, 0, 0, true},
-		{"期", args{title: "OVERLORD 第四期"}, 4, 0, false},
-		{"<10 没有0", args{title: "OVERLORD s4"}, 4, 0, false},
-		{">10", args{title: "OVERLORD s12"}, 12, 0, false},
-		{">100", args{title: "OVERLORD s12232"}, 12232, 0, false},
-		{"罗马数字", args{title: "OVERLORD IV"}, 4, 0, false},
-		{"<10 有0", args{title: "OVERLORD s04"}, 4, 0, false},
+		{"<10", args{title: "OVERLORD 第四季"}, 4, " 第四季", false},
+		{"无空格", args{title: "OVERLORD第四季"}, 0, "", false},
+		{"无数字", args{title: "OVERLORD 第季"}, 0, "", false},
+		{"10+", args{title: "OVERLORD 第十三季"}, 13, " 第十三季", false},
+		{">20", args{title: "OVERLORD 第三十四季"}, 34, " 第三十四季", false},
+		{"季信息格式错误", args{title: "OVERLORD 第三四二季"}, 0, " 第三四二季", true},
+		{"期", args{title: "OVERLORD 第四期"}, 4, " 第四期", false},
+		{"<10 没有0", args{title: "OVERLORD s4"}, 4, "s4", false},
+		{">10", args{title: "OVERLORD s12"}, 12, "s12", false},
+		{">100", args{title: "OVERLORD s12232"}, 12232, "s12232", false},
+		{"罗马数字", args{title: "OVERLORD IV"}, 4, " IV", false},
+		{"<10 有0", args{title: "OVERLORD s04"}, 4, "s04", false},
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotSeason, gotStatus, err := GetSeason(tt.args.title)
+			gotSeason, gotMatchStr, err := GetSeason(tt.args.title)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetSeason() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -81,8 +81,8 @@ func TestGetSeason(t *testing.T) {
 			if gotSeason != tt.wantSeason {
 				t.Errorf("GetSeason() gotSeason = %v, want %v", gotSeason, tt.wantSeason)
 			}
-			if gotStatus != tt.wantStatus {
-				t.Errorf("GetSeason() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			if gotMatchStr != tt.wantMatchStr {
+				t.Errorf("GetSeason() gotMatchStr = %v, want %v", gotMatchStr, tt.wantMatchStr)
 			}
 		})
 	}

@@ -30,7 +30,7 @@ func (this *RssApi) GetMikanInfo(ctx *gin.Context) {
 
 	res, err := this.service.GetInfoMikan(req)
 	if err != nil {
-		response.Error(ctx, "获取番剧mikan信息失败", err.Error())
+		response.Error(ctx, "获取番剧mikan信息失败")
 		return
 	}
 	response.Data(ctx, res)
@@ -51,7 +51,7 @@ func (this *RssApi) GetSearch(ctx *gin.Context) {
 
 	res, err := this.service.GetSearch(req)
 	if err != nil {
-		response.Error(ctx, "获取rss信息失败", err.Error())
+		response.Error(ctx, "获取rss信息失败")
 		return
 	}
 	response.Data(ctx, res)
@@ -75,7 +75,7 @@ func (this *RssApi) GetSubject(ctx *gin.Context) {
 
 	res, err := this.service.GetSubject(req)
 	if err != nil {
-		response.Error(ctx, "获取rss信息失败", err.Error())
+		response.Error(ctx, "获取rss信息失败")
 		return
 	}
 	response.Data(ctx, res)

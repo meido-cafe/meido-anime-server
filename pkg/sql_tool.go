@@ -68,7 +68,7 @@ func FormatConflict(key []string, field []string) (string, error) {
 //	string 生成的sql语句
 //	[]interface{} 执行参数
 //	error
-func FormatInsert(tableName string, data map[string]interface{}) (string, []interface{}, error) {
+func FormatInsert(tableName string, data map[string]any) (string, []any, error) {
 	if tableName == "" {
 		return "", nil, errors.New("insert sql 表名为空")
 	}
@@ -77,7 +77,7 @@ func FormatInsert(tableName string, data map[string]interface{}) (string, []inte
 		return "", nil, errors.New("insert sql 参数为空")
 	}
 
-	values := make([]interface{}, 0, n)
+	values := make([]any, 0, n)
 	fields := make([]string, 0, n)
 
 	sql := new(strings.Builder)
@@ -106,7 +106,7 @@ func FormatInsert(tableName string, data map[string]interface{}) (string, []inte
 //	string 生成的sql语句
 //	[]interface{} 执行参数
 //	error
-func FormatInsertBatch(tableName string, list []map[string]interface{}) (string, []interface{}, error) {
+func FormatInsertBatch(tableName string, list []map[string]any) (string, []any, error) {
 	if tableName == "" {
 		return "", nil, errors.New("insert sql 表名为空")
 	}
@@ -147,7 +147,7 @@ func FormatInsertBatch(tableName string, list []map[string]interface{}) (string,
 	builder.WriteString(fields)
 	builder.WriteString(" values ")
 
-	values := make([]interface{}, 0, n*m)
+	values := make([]any, 0, n*m)
 	placeholderAll := make([]string, 0, n) //  [ (?,?,?,?),(?,?,?,?)...]
 
 	for _, obj := range list {
@@ -173,7 +173,7 @@ func FormatInsertBatch(tableName string, list []map[string]interface{}) (string,
 //	string	生成的sql语句
 //	[]interface{} 用于执行的参数列表
 //	error
-func FormatInsertConflict(tableName string, data map[string]interface{}, key []string, updateList []string) (string, []interface{}, error) {
+func FormatInsertConflict(tableName string, data map[string]any, key []string, updateList []string) (string, []any, error) {
 	sql, values, err := FormatInsert(tableName, data)
 	if err != nil {
 		return "", nil, err
@@ -199,7 +199,7 @@ func FormatInsertConflict(tableName string, data map[string]interface{}, key []s
 //	string	生成的sql语句
 //	[]interface{} 用于执行的参数列表
 //	error
-func FormatInsertBatchConflict(tableName string, list []map[string]interface{}, key []string, updateList []string) (string, []interface{}, error) {
+func FormatInsertBatchConflict(tableName string, list []map[string]any, key []string, updateList []string) (string, []any, error) {
 	sql, value, err := FormatInsertBatch(tableName, list)
 	if err != nil {
 		return "", nil, err
@@ -209,4 +209,16 @@ func FormatInsertBatchConflict(tableName string, list []map[string]interface{}, 
 		return "", nil, err
 	}
 	return sql + csql, value, err
+}
+
+// CountSql 获取对sql查询结果进行count(*)的sql语句
+//
+// @auth roirea 2022-08-14 21:56:59
+// @params
+//	sql string 要进行count(*)的sql语句
+// @return
+//	string 生成的sql语句
+func CountSql(sql string) string {
+	str := `select count(*) from (` + sql + `) count_sql`
+	return str
 }

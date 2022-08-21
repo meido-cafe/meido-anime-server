@@ -15,4 +15,10 @@ func InitRouter(router *gin.RouterGroup) {
 		r.GET("search", c.GetSearch)
 		r.GET("subject", c.GetSubject)
 	}
+	{
+		r := b.Group("video") // /api/v1/video
+		c := factory.NewVideoApi()
+		r.POST("subscribe", c.Subscribe) // 订阅番剧
+		r.GET("list", c.GetList)         // 获取番剧列表
+	}
 }

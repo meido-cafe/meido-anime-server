@@ -25,7 +25,7 @@ func PreHandleTitle(title string) string {
 // GetSeason 提取季
 //
 // S02,S2,s2,s02,第2季,第2期,第二季,第二期
-func GetSeason(title string) (season int64, status int, err error) {
+func GetSeason(title string) (season int64, matchStr string, err error) {
 	var ret string
 	var reg *regexp.Regexp
 
@@ -36,6 +36,7 @@ func GetSeason(title string) (season int64, status int, err error) {
 	}
 	ret = reg.FindString(title)
 	if ret != "" {
+		matchStr = ret
 		ret = strings.TrimSpace(ret)
 		ret = strings.Replace(ret, "第", "", 1)
 		ret = strings.Replace(ret, "季", "", 1)
@@ -51,6 +52,7 @@ func GetSeason(title string) (season int64, status int, err error) {
 	}
 	ret = reg.FindString(title)
 	if ret != "" {
+		matchStr = ret
 		reg, err = regexp.Compile("\\d+")
 		if err != nil {
 			return
@@ -69,14 +71,13 @@ func GetSeason(title string) (season int64, status int, err error) {
 	}
 	ret = reg.FindString(title)
 	if ret != "" {
+		matchStr = ret
 		ret = strings.TrimSpace(ret)
 		ret = strings.Replace(ret, "第", "", 1)
 		season = Rome2int(ret)
 		return
 	}
 
-	status = 1
-	season = 1
 	return
 }
 

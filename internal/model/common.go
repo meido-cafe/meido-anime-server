@@ -3,8 +3,8 @@ package model
 import "errors"
 
 type Page struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
+	Page     int `form:"page" json:"page"`
+	PageSize int `form:"page_size" json:"page_size"`
 }
 
 func (p *Page) CheckPage() error {

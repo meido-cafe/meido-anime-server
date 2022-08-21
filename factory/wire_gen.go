@@ -42,3 +42,23 @@ func NewRssApi() *v1.RssApi {
 	rssApi := v1.NewRssApi(rssService)
 	return rssApi
 }
+
+// Injectors from video.go:
+
+func NewVideoRepo() repo.VideoInterface {
+	db := NewDB()
+	videoInterface := repo.NewVideoRepo(db)
+	return videoInterface
+}
+
+func NewVideoService() *service.VideoService {
+	videoInterface := NewVideoRepo()
+	videoService := service.NewVideoService(videoInterface)
+	return videoService
+}
+
+func NewVideoApi() *v1.VideoApi {
+	videoService := NewVideoService()
+	videoApi := v1.NewVideoApi(videoService)
+	return videoApi
+}

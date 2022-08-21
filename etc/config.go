@@ -4,7 +4,7 @@ import (
 	"errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"meido-anime-server/internal/pkg"
+	"meido-anime-server/pkg"
 	"os"
 	"sync"
 )

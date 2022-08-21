@@ -41,7 +41,6 @@ jobs:
 
           script: |
             cd ${{ secrets.DEV_REMOTE_TARGET }}
-            cat demo.txt
             
             docker stop ${{ secrets.DEV_DOCKER_NAME }}
             docker rm ${{ secrets.DEV_DOCKER_NAME }}

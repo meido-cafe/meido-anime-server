@@ -1,4 +1,3 @@
 package repo
 
-type RssInterface interface {
-}
+type RssInterface any
