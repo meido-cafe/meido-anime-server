@@ -36,6 +36,20 @@ func (this *VideoApi) GetList(ctx *gin.Context) {
 	response.List(ctx, res.Items, res.Total)
 }
 
+func (this *VideoApi) GetOne(ctx *gin.Context) {
+	req := vo.VideoGetOneRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+	if req.Id == 0 && req.BangumiId == 0 {
+		response.Bad(ctx, "缺少参数")
+		return
+	}
+	this.service.GetOne(req)
+	response.Data(ctx, nil)
+}
+
 // 有bangumi 订阅rss
 func (this *VideoApi) Subscribe(ctx *gin.Context) {
 	req := vo.VideoSubscribeRequest{}
@@ -58,7 +72,11 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 		return
 	}
 
-	exist, err := this.service.GetByBangumiId(req.BangumiId)
+	exist, err := this.service.GetOne(vo.VideoGetOneRequest{
+		Id:        0,
+		BangumiId: req.BangumiId,
+	})
+
 	if err != nil {
 		response.Error(ctx, "下载记录添加失败")
 		return

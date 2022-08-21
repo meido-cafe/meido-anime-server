@@ -31,7 +31,7 @@ jobs:
       #          target: ${{ secrets.DEV_REMOTE_TARGET }}
       #          rm: true
 
-      - name: ssh cp
+      - name: scp
         uses: easingthemes/ssh-deploy@v2.0.8
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEV_REMOTE_SSH_KEY }}

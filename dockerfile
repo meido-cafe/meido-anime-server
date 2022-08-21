@@ -9,7 +9,7 @@ ENV GO111MODULE=on \
 WORKDIR /build
 COPY . .
 
-RUN go build -ldflags="-s -w" -trimpath -o app .
+RUN CGO_ENABLE=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o app .
 
 
 FROM alpine

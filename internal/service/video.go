@@ -21,11 +21,10 @@ type VideoService struct {
 	repo repo.VideoInterface
 }
 
-func (this *VideoService) GetByBangumiId(bangumiId int64) (ret model.Video, err error) {
-	ret, err = this.repo.SelectOne(context.TODO(), 0, bangumiId)
+func (this *VideoService) GetOne(request vo.VideoGetOneRequest) (ret model.Video, err error) {
+	ret, err = this.repo.SelectOne(context.TODO(), request.Id, request.BangumiId)
 	if err != nil {
 		logger.Error(err)
-		return
 	}
 	return
 }
