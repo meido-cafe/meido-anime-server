@@ -207,9 +207,3 @@ func (this *VideoRepo) UpdateRss(ctx context.Context, id int64, rss string) (err
 	_, err = this.db.Exec(sql, rss, id)
 	return
 }
-
-func (this *VideoRepo) DeleteRss(ctx context.Context, id int64) (err error) {
-	sql := ` update video set rss_url = '' where id = ? `
-	_, err = this.db.Exec(sql, id)
-	return
-}

@@ -77,7 +77,7 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 	return
 }
 
-func (this VideoService) GetList(request vo.VideoGetListRequest) (response vo.VideoGetListResponse, err error) {
+func (this *VideoService) GetList(request vo.VideoGetListRequest) (response vo.VideoGetListResponse, err error) {
 	list, total, err := this.repo.SelectList(context.TODO(), request)
 	if err != nil {
 		logger.Error(err)
@@ -85,5 +85,21 @@ func (this VideoService) GetList(request vo.VideoGetListRequest) (response vo.Vi
 	}
 	response.Items = list
 	response.Total = total
+	return
+}
+
+func (this *VideoService) DeleteRss(request vo.DeleteRssRequest) (err error) {
+	err = this.repo.UpdateRss(context.TODO(), request.Id, "")
+	if err != nil {
+		logger.Error(err)
+	}
+	return
+
+}
+func (this *VideoService) UpdateRss(request vo.UpdateRssRequest) (err error) {
+	err = this.repo.UpdateRss(context.TODO(), request.Id, request.Rss)
+	if err != nil {
+		logger.Error(err)
+	}
 	return
 }

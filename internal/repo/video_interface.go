@@ -13,5 +13,4 @@ type VideoInterface interface {
 	DeleteList(ctx context.Context, idList []int64) (err error)                                                 // 批量删除video
 
 	UpdateRss(ctx context.Context, id int64, rss string) (err error) // 根据id更新rss链接
-	DeleteRss(ctx context.Context, id int64) (err error)             // 删除rss链接
 }

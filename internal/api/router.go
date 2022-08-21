@@ -20,5 +20,7 @@ func InitRouter(router *gin.RouterGroup) {
 		c := factory.NewVideoApi()
 		r.POST("subscribe", c.Subscribe) // 订阅番剧
 		r.GET("list", c.GetList)         // 获取番剧列表
+		r.DELETE("rss", c.DeleteRss)     // 删除rss链接
+		r.PUT("rss", c.UpdateRss)        // 更新rss链接
 	}
 }

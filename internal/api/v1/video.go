@@ -74,3 +74,44 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 	}
 	response.Success(ctx)
 }
+
+func (this *VideoApi) DeleteRss(ctx *gin.Context) {
+	req := vo.DeleteRssRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+	if req.Id == 0 {
+		response.Bad(ctx, "id不能为空")
+		return
+	}
+	if err := this.service.DeleteRss(req); err != nil {
+		response.Error(ctx, "")
+		return
+	}
+
+	response.Success(ctx)
+}
+
+func (this *VideoApi) UpdateRss(ctx *gin.Context) {
+	req := vo.UpdateRssRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+	if req.Id == 0 {
+		response.Bad(ctx, "id不能为空")
+		return
+	}
+	if req.Rss == "" {
+		response.Bad(ctx, "rss链接不能为空")
+		return
+	}
+	if err := this.service.UpdateRss(req); err != nil {
+		response.Error(ctx, "")
+		return
+	}
+
+	response.Success(ctx)
+
+}
