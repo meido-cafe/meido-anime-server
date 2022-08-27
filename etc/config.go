@@ -4,8 +4,8 @@ import (
 	"errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"meido-anime-server/pkg"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -32,7 +32,7 @@ var configOnce sync.Once
 func marshal(filename string) {
 	var err error
 
-	byt, err := ioutil.ReadFile(pkg.NewPath().Join(".").Join("etc").Join(filename + ".yaml").String())
+	byt, err := ioutil.ReadFile(filepath.Join("etc", filename+".yaml"))
 	if err != nil {
 		panic(err)
 	}

@@ -5,7 +5,7 @@ import (
 	"log"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/repo"
-	"meido-anime-server/pkg"
+	"meido-anime-server/internal/tool"
 	"net/url"
 	"strconv"
 	"strings"
@@ -57,7 +57,7 @@ func (this *RssService) GetInfoMikan(request vo.GetRssInfoMikanRequest) (respons
 
 func (this *RssService) GetSearch(request vo.GetRssSearchRequest) (response vo.GetRssSearchResponse, err error) {
 	response.Url = "https://mikanani.me/RSS/Search?searchstr=" + url.QueryEscape(request.SubjectName)
-	response.Feed, err = pkg.ParseRss(response.Url)
+	response.Feed, err = tool.ParseRss(response.Url)
 	if err != nil {
 		log.Println(err)
 		return
@@ -68,7 +68,7 @@ func (this *RssService) GetSearch(request vo.GetRssSearchRequest) (response vo.G
 
 func (this *RssService) GetSubject(request vo.GetRssSubjectRequest) (response vo.GetRssSubjectResponse, err error) {
 	response.Url = "https://mikanani.me/RSS/Bangumi?bangumiId=" + strconv.Itoa(int(request.MikanId)) + "&subgroupid=" + strconv.Itoa(int(request.MikanGroupId))
-	response.Feed, err = pkg.ParseRss(response.Url)
+	response.Feed, err = tool.ParseRss(response.Url)
 	if err != nil {
 		log.Println(err)
 		return

@@ -13,6 +13,7 @@ import (
 func NewVideoRepo() (ret repo.VideoInterface) {
 	panic(wire.Build(
 		NewDB,
+		NewSqlTool,
 		repo.NewVideoRepo,
 	))
 	return

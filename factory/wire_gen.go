@@ -10,17 +10,23 @@ import (
 	"github.com/jmoiron/sqlx"
 	"meido-anime-server/etc"
 	"meido-anime-server/internal/api/v1"
-	"meido-anime-server/internal/app"
+	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/repo"
 	"meido-anime-server/internal/service"
+	"meido-anime-server/internal/tool"
 )
 
 // Injectors from common.go:
 
 func NewDB() *sqlx.DB {
 	config := etc.NewConfig()
-	db := app.NewDB(config)
+	db := common.NewDB(config)
 	return db
+}
+
+func NewSqlTool() *tool.Sql {
+	sql := tool.NewSql()
+	return sql
 }
 
 // Injectors from rss.go:
@@ -47,7 +53,8 @@ func NewRssApi() *v1.RssApi {
 
 func NewVideoRepo() repo.VideoInterface {
 	db := NewDB()
-	videoInterface := repo.NewVideoRepo(db)
+	sql := NewSqlTool()
+	videoInterface := repo.NewVideoRepo(db, sql)
 	return videoInterface
 }
 

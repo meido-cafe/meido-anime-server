@@ -1,4 +1,4 @@
-package pkg
+package tool
 
 type Query struct {
 	values []any

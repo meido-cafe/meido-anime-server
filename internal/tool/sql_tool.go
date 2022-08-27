@@ -1,9 +1,16 @@
-package pkg
+package tool
 
 import (
 	"errors"
 	"strings"
 )
+
+type Sql struct {
+}
+
+func NewSql() *Sql {
+	return &Sql{}
+}
 
 // FormatList 格式化 in 关键词的列表参数
 //
@@ -12,7 +19,7 @@ import (
 //	n int 参数列表的长度
 // @return
 //	string	(?,?,?...)格式的sql语句
-func FormatList(n int) string {
+func (p *Sql) FormatList(n int) string {
 	arr := make([]string, n)
 	for i := 0; i < n; i++ {
 		arr[i] = "?"
@@ -35,7 +42,7 @@ func FormatList(n int) string {
 // @return
 //	string 生成的conflict sql语句
 //	error
-func FormatConflict(key []string, field []string) (string, error) {
+func (p *Sql) FormatConflict(key []string, field []string) (string, error) {
 	if len(key) <= 0 {
 		return "", errors.New("唯一约束键为空")
 	}
@@ -68,7 +75,7 @@ func FormatConflict(key []string, field []string) (string, error) {
 //	string 生成的sql语句
 //	[]interface{} 执行参数
 //	error
-func FormatInsert(tableName string, data map[string]any) (string, []any, error) {
+func (p *Sql) FormatInsert(tableName string, data map[string]any) (string, []any, error) {
 	if tableName == "" {
 		return "", nil, errors.New("insert sql 表名为空")
 	}
@@ -92,7 +99,7 @@ func FormatInsert(tableName string, data map[string]any) (string, []any, error) 
 
 	sql.WriteString(strings.Join(fields, ","))
 	sql.WriteString(" ) values ")
-	sql.WriteString(FormatList(n))
+	sql.WriteString(p.FormatList(n))
 	return sql.String(), values, nil
 }
 
@@ -106,7 +113,7 @@ func FormatInsert(tableName string, data map[string]any) (string, []any, error) 
 //	string 生成的sql语句
 //	[]interface{} 执行参数
 //	error
-func FormatInsertBatch(tableName string, list []map[string]any) (string, []any, error) {
+func (p *Sql) FormatInsertBatch(tableName string, list []map[string]any) (string, []any, error) {
 	if tableName == "" {
 		return "", nil, errors.New("insert sql 表名为空")
 	}
@@ -173,13 +180,13 @@ func FormatInsertBatch(tableName string, list []map[string]any) (string, []any, 
 //	string	生成的sql语句
 //	[]interface{} 用于执行的参数列表
 //	error
-func FormatInsertConflict(tableName string, data map[string]any, key []string, updateList []string) (string, []any, error) {
-	sql, values, err := FormatInsert(tableName, data)
+func (p *Sql) FormatInsertConflict(tableName string, data map[string]any, key []string, updateList []string) (string, []any, error) {
+	sql, values, err := p.FormatInsert(tableName, data)
 	if err != nil {
 		return "", nil, err
 	}
 
-	csql, err := FormatConflict(key, updateList)
+	csql, err := p.FormatConflict(key, updateList)
 	if err != nil {
 		return "", nil, err
 	}
@@ -199,12 +206,12 @@ func FormatInsertConflict(tableName string, data map[string]any, key []string, u
 //	string	生成的sql语句
 //	[]interface{} 用于执行的参数列表
 //	error
-func FormatInsertBatchConflict(tableName string, list []map[string]any, key []string, updateList []string) (string, []any, error) {
-	sql, value, err := FormatInsertBatch(tableName, list)
+func (p *Sql) FormatInsertBatchConflict(tableName string, list []map[string]any, key []string, updateList []string) (string, []any, error) {
+	sql, value, err := p.FormatInsertBatch(tableName, list)
 	if err != nil {
 		return "", nil, err
 	}
-	csql, err := FormatConflict(key, updateList)
+	csql, err := p.FormatConflict(key, updateList)
 	if err != nil {
 		return "", nil, err
 	}
@@ -218,7 +225,7 @@ func FormatInsertBatchConflict(tableName string, list []map[string]any, key []st
 //	sql string 要进行count(*)的sql语句
 // @return
 //	string 生成的sql语句
-func CountSql(sql string) string {
+func (p *Sql) CountSql(sql string) string {
 	str := `select count(*) from (` + sql + `) count_sql`
 	return str
 }

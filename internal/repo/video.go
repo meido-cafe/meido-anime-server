@@ -7,16 +7,17 @@ import (
 	"log"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
-	tool "meido-anime-server/pkg"
+	"meido-anime-server/internal/tool"
 	"strings"
 )
 
-func NewVideoRepo(db *sqlx.DB) VideoInterface {
-	return &VideoRepo{db: db}
+func NewVideoRepo(db *sqlx.DB, sql *tool.Sql) VideoInterface {
+	return &VideoRepo{db: db, sql: sql}
 }
 
 type VideoRepo struct {
-	db *sqlx.DB
+	db  *sqlx.DB
+	sql *tool.Sql
 }
 
 func (this *VideoRepo) getFields() string {
@@ -42,7 +43,7 @@ func (this *VideoRepo) SelectOne(ctx context.Context, id int64, bangumiId int64)
 		return
 	}
 	q := tool.NewQuery()
-	sql := `select ` + this.getFields() + ` from video where true `
+	sql := ` select ` + this.getFields() + ` from video where true `
 	if id > 0 {
 		sql += ` and id = ? `
 		q.Add(id)
@@ -59,7 +60,7 @@ func (this *VideoRepo) SelectOne(ctx context.Context, id int64, bangumiId int64)
 }
 
 func (this *VideoRepo) InsertOne(ctx context.Context, video model.Video) (err error) {
-	str, values, err := tool.FormatInsert("video", map[string]any{
+	str, values, err := this.sql.FormatInsert("video", map[string]any{
 		"bangumi_id":  video.BangumiId,
 		"title":       video.Title,
 		"category":    video.Category,
@@ -123,7 +124,7 @@ func (this *VideoRepo) SelectList(ctx context.Context, req vo.VideoGetListReques
 		q.Add(req.Title)
 	}
 
-	countSQL := tool.CountSql(querySQL)
+	countSQL := this.sql.CountSql(querySQL)
 	countQuery, err := tx.Query(countSQL, q.Values()...)
 	if err != nil {
 		return
@@ -175,7 +176,7 @@ func (this *VideoRepo) SelectOneById(ctx context.Context, id int64) (ret model.V
 func (this *VideoRepo) DeleteList(ctx context.Context, idList []int64) (err error) {
 	q := tool.NewQuery()
 	q.Add(idList)
-	sql := ` delete from video where id in ` + tool.FormatList(len(idList))
+	sql := ` delete from video where id in ` + this.sql.FormatList(len(idList))
 	_, err = this.db.Exec(sql, q.Values()...)
 	return
 }

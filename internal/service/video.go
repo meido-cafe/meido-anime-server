@@ -6,7 +6,7 @@ import (
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/repo"
-	"meido-anime-server/pkg"
+	"meido-anime-server/internal/tool"
 	"strings"
 	"time"
 )
@@ -38,7 +38,7 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 	if request.Season > 0 {
 		season = request.Season
 	} else {
-		season, matchStr, err = pkg.GetSeason(request.Title)
+		season, matchStr, err = tool.GetSeason(request.Title)
 		if err != nil {
 			return
 		}
