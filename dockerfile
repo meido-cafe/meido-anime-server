@@ -9,7 +9,7 @@ ENV GO111MODULE=on \
     GOPROXY=https://goproxy.cn
 
 WORKDIR /build
-COPY dockerfile .
+COPY . .
 
 RUN go build -ldflags="-s -w" -trimpath -o app .
 
