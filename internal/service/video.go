@@ -2,23 +2,27 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
+	"meido-anime-server/internal/global"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/repo"
 	"meido-anime-server/internal/tool"
+	"path/filepath"
 	"strings"
 	"time"
 )
+
+type VideoService struct {
+	repo repo.VideoInterface
+}
 
 func NewVideoService(repo repo.VideoInterface) *VideoService {
 	return &VideoService{
 		repo: repo,
 	}
-}
-
-type VideoService struct {
-	repo repo.VideoInterface
 }
 
 func (this *VideoService) GetOne(request vo.VideoGetOneRequest) (ret model.Video, err error) {
@@ -53,27 +57,56 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 		}
 	}
 
+	downloadPath := filepath.Join(global.QBDownloadPath, request.Title, fmt.Sprintf("S%02d", season))
+
 	data := model.Video{
-		BangumiId: request.BangumiId,
-		Origin:    1,
-		Category:  request.Category,
-		Title:     request.Title,
-		Season:    season,
-		Cover:     request.Cover,
-		Total:     request.Total,
-		RssUrl:    request.RssUrl,
-		PlayTime:  request.PlayTime,
+		BangumiId:    request.BangumiId,
+		Origin:       1,
+		Category:     request.Category,
+		Title:        request.Title,
+		Season:       season,
+		Cover:        request.Cover,
+		Total:        request.Total,
+		RssUrl:       request.RssUrl,
+		PlayTime:     request.PlayTime,
+		DownloadPath: downloadPath,
 		Time: model.Time{
 			CreateTime: time.Now().Unix(),
 			UpdateTime: time.Now().Unix(),
 		},
 	}
 
-	if err = this.repo.InsertOne(context.TODO(), data); err != nil {
+	qbRule := model.QBRule{
+		Enabled:                   true,
+		MustContain:               request.MustContain,
+		MustNotContain:            request.MustNotContain,
+		UseRegex:                  true,
+		EpisodeFilter:             request.EpisodeFilter,
+		SmartFilter:               request.SmartFilter,
+		PreviouslyMatchedEpisodes: nil,
+		AffectedFeeds:             []string{request.RssUrl},
+		IgnoreDays:                0,
+		LastMatch:                 "",
+		AddPaused:                 false,
+		AssignedCategory:          global.QBCategory,
+		SavePath:                  downloadPath,
+	}
+
+	marshal, err := json.Marshal(qbRule)
+	if err != nil {
+		log.Printf("[%s]解析失败:%v", request.Title, err)
+		return err
+	}
+	setRule := model.QBSetRule{
+		RuleName: fmt.Sprintf("%s - S%02d", request.Title, season),
+		RuleDef:  string(marshal),
+	}
+
+	if err = this.repo.InsertOne(context.TODO(), data, setRule); err != nil {
 		log.Println(err)
 		return
 	}
-	log.Printf(`[bangumi:%d][%s][第%d季] 添加成功`, request.BangumiId, request.Title, season)
+	log.Printf(`[bangumi:%d][%s][第%d季] 订阅成功,下载路径:[%s]`, request.BangumiId, request.Title, season, downloadPath)
 	return
 }
 
@@ -101,5 +134,21 @@ func (this *VideoService) UpdateRss(request vo.UpdateRssRequest) (err error) {
 	if err != nil {
 		log.Println(err)
 	}
+	return
+}
+
+func (this *VideoService) GetQBLogs() (res vo.GetQBLogsResponse, err error) {
+	logs, err := this.repo.GetQBLogs(context.TODO())
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	for _, item := range logs {
+		res.Items = append(res.Items, vo.GetQBLogsResponseItem{
+			QBLog: item,
+			Time:  time.UnixMilli(item.Timestamp).Format("2006-01-02 15:04:05"),
+		})
+	}
+
 	return
 }

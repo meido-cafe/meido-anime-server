@@ -27,25 +27,29 @@ type VideoGetOneResponse struct {
 	Video model.Video `json:"video"`
 }
 type VideoSubscribeRequest struct {
-	BangumiId int64  `json:"bangumi_id"` // bangumi的ID
-	Title     string `json:"title"`      // 标题
-	Category  int64  `json:"category"`   // 类别 1:tv 2:剧场版 3:OVA
-	Season    int64  `json:"season"`     // 第几季
-	Cover     string `json:"cover"`      // 封面图
-	Total     int64  `json:"total"`      // 总集数
-	PlayTime  int64  `json:"play_time"`  // 放送时间
+	BangumiId int64  `form:"bangumi_id" json:"bangumi_id"` // bangumi的ID
+	Title     string `form:"title" json:"title"`           // 标题
+	Category  int64  `form:"category" json:"category"`     // 类别 1:tv 2:剧场版 3:OVA
+	Season    int64  `form:"season" json:"season"`         // 第几季
+	Cover     string `form:"cover" json:"cover"`           // 封面图
+	Total     int64  `form:"total" json:"total"`           // 总集数
+	PlayTime  int64  `form:"play_time" json:"play_time"`   // 放送时间
+	RssUrl    string `form:"rss_url" json:"rss_url"`       // RSS 链接
 
-	RssUrl string `json:"rss_url"` // rss链接
+	MustContain    string `form:"must_contain" json:"must_contain"`         // 必须包含
+	MustNotContain string `form:"must_not_contain" json:"must_not_contain"` // 必须不包含
+	EpisodeFilter  string `form:"episode_filter" json:"episode_filter"`     // 剧集过滤
+	SmartFilter    bool   `form:"smart_filter" json:"smart_filter"`         // 是否开启智能剧集过滤
 }
 
 type VideoAddTorrent struct {
-	BangumiId int64  `json:"bangumi_id"` // bangumi的ID
-	Title     string `json:"title"`      // 标题
-	Category  int64  `json:"category"`   // 类别 1:tv 2:剧场版 3:OVA
-	Season    int64  `json:"season"`     // 第几季
-	Cover     string `json:"cover"`      // 封面图
-	Total     int64  `json:"total"`      // 总集数
-	PlayTime  int64  `json:"play_time"`  // 放送时间
+	BangumiId int64  `form:"bangumi_id" json:"bangumi_id"` // bangumi的ID
+	Title     string `form:"title" json:"title"`           // 标题
+	Category  int64  `form:"category" json:"category"`     // 类别 1:tv 2:剧场版 3:OVA
+	Season    int64  `form:"season" json:"season"`         // 第几季
+	Cover     string `form:"cover" json:"cover"`           // 封面图
+	Total     int64  `form:"total" json:"total"`           // 总集数
+	PlayTime  int64  `form:"play_time" json:"play_time"`   // 放送时间
 
 	TorrentList []string `json:"torrent_list"` // 种子列表
 }

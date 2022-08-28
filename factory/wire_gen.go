@@ -29,6 +29,12 @@ func NewSqlTool() *tool.Sql {
 	return sql
 }
 
+func NewQB() *common.QB {
+	config := etc.NewConfig()
+	qb := common.NewQB(config)
+	return qb
+}
+
 // Injectors from rss.go:
 
 func NewRssRepo() repo.RssInterface {
@@ -54,7 +60,8 @@ func NewRssApi() *v1.RssApi {
 func NewVideoRepo() repo.VideoInterface {
 	db := NewDB()
 	sql := NewSqlTool()
-	videoInterface := repo.NewVideoRepo(db, sql)
+	qb := NewQB()
+	videoInterface := repo.NewVideoRepo(db, sql, qb)
 	return videoInterface
 }
 

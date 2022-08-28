@@ -14,6 +14,7 @@ func NewVideoRepo() (ret repo.VideoInterface) {
 	panic(wire.Build(
 		NewDB,
 		NewSqlTool,
+		NewQB,
 		repo.NewVideoRepo,
 	))
 	return

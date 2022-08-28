@@ -10,6 +10,7 @@ create table if not exists video
     total       integer default 0 not null,
     rss_url     text    default '' not null,
     play_time   integer default 0 not null,
+    download_path   text    default '' not null,
     create_time integer default 0 not null,
     update_time integer default 0 not null
 );

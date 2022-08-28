@@ -3,21 +3,24 @@ package repo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"log"
+	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/tool"
 	"strings"
 )
 
-func NewVideoRepo(db *sqlx.DB, sql *tool.Sql) VideoInterface {
-	return &VideoRepo{db: db, sql: sql}
+func NewVideoRepo(db *sqlx.DB, sql *tool.Sql, qb *common.QB) VideoInterface {
+	return &VideoRepo{db: db, sql: sql, qb: qb}
 }
 
 type VideoRepo struct {
 	db  *sqlx.DB
 	sql *tool.Sql
+	qb  *common.QB
 }
 
 func (this *VideoRepo) getFields() string {
@@ -52,32 +55,92 @@ func (this *VideoRepo) SelectOne(ctx context.Context, id int64, bangumiId int64)
 		sql += ` and bangumi_id = ? `
 		q.Add(bangumiId)
 	}
-	if err = this.db.Get(&res, sql, q.Values()...); err != nil {
+
+	rowx, err := this.db.Queryx(sql, q.Values()...)
+	if err != nil {
 		log.Println(err)
 		return
+	}
+	if rowx.Next() {
+		if err = rowx.StructScan(&res); err != nil {
+			log.Println(err)
+			return
+		}
 	}
 	return
 }
 
-func (this *VideoRepo) InsertOne(ctx context.Context, video model.Video) (err error) {
-	str, values, err := this.sql.FormatInsert("video", map[string]any{
-		"bangumi_id":  video.BangumiId,
-		"title":       video.Title,
-		"category":    video.Category,
-		"origin":      video.Origin,
-		"season":      video.Season,
-		"cover":       video.Cover,
-		"total":       video.Total,
-		"rss_url":     video.RssUrl,
-		"play_time":   video.PlayTime,
-		"create_time": video.CreateTime,
-		"update_time": video.UpdateTime,
+func (this *VideoRepo) InsertOne(ctx context.Context, video model.Video, rule model.QBSetRule) (err error) {
+	tx, err := this.db.Beginx()
+	if err != nil {
+		return
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// DB
+	sql, values, err := this.sql.FormatInsert("video", map[string]any{
+		"bangumi_id":    video.BangumiId,
+		"title":         video.Title,
+		"category":      video.Category,
+		"origin":        video.Origin,
+		"season":        video.Season,
+		"cover":         video.Cover,
+		"total":         video.Total,
+		"rss_url":       video.RssUrl,
+		"play_time":     video.PlayTime,
+		"download_path": video.DownloadPath,
+		"create_time":   video.CreateTime,
+		"update_time":   video.UpdateTime,
 	})
 	if err != nil {
+		log.Println(err)
 		return err
 	}
-	if _, err = this.db.Exec(str, values...); err != nil {
+	if _, err = tx.Exec(sql, values...); err != nil {
+		log.Println(err)
 		return err
+	}
+
+	/* QB */
+
+	// 添加rss
+	ret, err := this.qb.Client.R().SetQueryParams(map[string]string{
+		"url":  video.RssUrl,
+		"path": rule.RuleName,
+	}).Get("/rss/addFeed")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	if ret.IsError() {
+		err = errors.New(fmt.Sprintf("[%s] 订阅失败, qbittorrent status: [%d] \n", video.Title, ret.StatusCode))
+		log.Println(err)
+		return
+	}
+
+	ret, err = this.qb.Client.R().SetQueryParams(map[string]string{
+		"ruleName": rule.RuleName,
+		"ruleDef":  rule.RuleDef,
+	}).Get("/rss/setRule")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if ret.IsError() {
+		err = errors.New(fmt.Sprintf("[%s] 订阅失败, qbittorrent status: [%d] \n", video.Title, ret.StatusCode))
+		log.Println(err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err)
+		return
 	}
 	return
 }
@@ -184,5 +247,19 @@ func (this *VideoRepo) DeleteList(ctx context.Context, idList []int64) (err erro
 func (this *VideoRepo) UpdateRss(ctx context.Context, id int64, rss string) (err error) {
 	sql := ` update video set rss_url = ? where id = ? `
 	_, err = this.db.Exec(sql, rss, id)
+	return
+}
+
+func (this *VideoRepo) GetQBLogs(ctx context.Context) (res []model.QBLog, err error) {
+	ret, err := this.qb.Client.R().Get("/log/main")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err = ret.UnmarshalJson(&res); err != nil {
+		log.Println(err)
+		return
+	}
 	return
 }

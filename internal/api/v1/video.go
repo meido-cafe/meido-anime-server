@@ -61,6 +61,7 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 		response.BadBind(ctx)
 		return
 	}
+
 	req.Title = strings.TrimSpace(req.Title)
 	req.RssUrl = strings.TrimSpace(req.RssUrl)
 
@@ -70,9 +71,6 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 		return
 	case req.Title == "":
 		response.Bad(ctx, "番剧名称不能为空")
-		return
-	case req.RssUrl == "":
-		response.Bad(ctx, "rss订阅链接不能为空")
 		return
 	}
 
@@ -85,6 +83,7 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 		response.Error(ctx, "下载记录添加失败")
 		return
 	}
+
 	if exist.Id > 0 {
 		response.Bad(ctx, "番剧已存在")
 		return
@@ -136,4 +135,13 @@ func (this *VideoApi) UpdateRss(ctx *gin.Context) {
 
 	response.Success(ctx)
 
+}
+
+func (this *VideoApi) GetQBLogs(ctx *gin.Context) {
+	logs, err := this.service.GetQBLogs()
+	if err != nil {
+		response.Error(ctx, "获取日志失败")
+		return
+	}
+	response.List(ctx, logs.Items, logs.Total)
 }

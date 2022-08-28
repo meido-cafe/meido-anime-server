@@ -25,3 +25,11 @@ func NewSqlTool() (ret *tool.Sql) {
 	))
 	return
 }
+
+func NewQB() (ret *common.QB) {
+	panic(wire.Build(
+		etc.NewConfig,
+		common.NewQB,
+	))
+	return
+}
