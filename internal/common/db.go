@@ -3,6 +3,7 @@ package common
 import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	"io/ioutil"
 	"meido-anime-server/etc"
 	"sync"
 )
@@ -19,6 +20,15 @@ func NewDB(conf *etc.Config) *sqlx.DB {
 			return
 		}
 		db.SetMaxOpenConns(conf.Db.MaxCons)
+
+		byt, err := ioutil.ReadFile("./sql/init.sql")
+		if err != nil {
+			panic(err)
+		}
+
+		if _, err = db.Exec(string(byt)); err != nil {
+			panic(err)
+		}
 	})
 	return db
 }

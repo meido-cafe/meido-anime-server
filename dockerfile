@@ -23,10 +23,10 @@ RUN apk add tzdata && \
     echo "Asia/Shanghai" > /etc/timezone
 
 COPY --from=builder /build/app /
+COPY sql/init.sql /sql/
 COPY etc/common.yaml /etc/
 COPY etc/dev.yaml /etc/
 COPY etc/pro.yaml /etc/
-COPY meido-anime.db /
 
 # nas-anime的web端口
 ENV QB_WEB_URL=http://localhost:8081
