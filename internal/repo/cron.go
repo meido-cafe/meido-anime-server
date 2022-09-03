@@ -15,7 +15,7 @@ func NewCronRepo(db *sqlx.DB) *CronRepo {
 }
 
 func (this *CronRepo) GetVideoList() (res []model.Video, err error) {
-	sql := `select  id, bangumi_id, title, season, cover, total, rss_url, play_time, create_time, update_time from video `
+	sql := `select  id, bangumi_id, title, season, cover, total, rss_url, play_time, download_path,create_time, update_time from video `
 	queryx, err := this.db.Queryx(sql)
 	if err != nil {
 		log.Println(err)

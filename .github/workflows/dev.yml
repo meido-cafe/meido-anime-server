@@ -44,8 +44,8 @@ jobs:
           script: |
             cd ${{ secrets.DEV_REMOTE_TARGET }}
             
-            docker stop -v ${{ secrets.DEV_DOCKER_NAME }}
-            docker rm -v ${{ secrets.DEV_DOCKER_NAME }}
+            docker stop ${{ secrets.DEV_DOCKER_NAME }}
+            docker rm ${{ secrets.DEV_DOCKER_NAME }}
             
             docker load -i ${{ secrets.DEV_DOCKER_NAME }}.tar
             

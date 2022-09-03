@@ -23,7 +23,7 @@ func NewCronService(cronRepo *repo.CronRepo) *CronService {
 }
 
 func (this *CronService) Start() {
-	if err := this.register(this.demo); err != nil {
+	if err := this.register(); err != nil {
 		log.Fatalln(err)
 	}
 	this.cron.Run()
@@ -50,15 +50,4 @@ func (this *CronService) register(list ...cronFunc) (err error) {
 		}
 	}
 	return
-}
-
-func (this *CronService) demo() producer {
-	return producer{"*/30 * * * * *", func() {
-		res, err := this.repo.GetVideoList()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		fmt.Println(res)
-	}}
 }
