@@ -3,5 +3,5 @@ server:
   gin_mode: debug # debug,release,test
 
 database:
-  path: ./meido-anime.db
+  path: /var/db/meido-anime.db
   max_cons: 10

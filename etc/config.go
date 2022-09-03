@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 	"meido-anime-server/internal/global"
 	"os"
 	"path/filepath"
@@ -78,6 +79,7 @@ func handlePro() {
 
 func InitConfig() {
 	configOnce.Do(func() {
+		log.Println("初始化配置")
 		marshal("common")
 		switch Conf.Env {
 		case "local":
@@ -89,6 +91,7 @@ func InitConfig() {
 		default:
 			panic(errors.New("错误的环境类型"))
 		}
+		log.Println("配置初始化完成")
 	})
 }
 

@@ -28,6 +28,7 @@ COPY etc/common.yaml /etc/
 COPY etc/dev.yaml /etc/
 COPY etc/pro.yaml /etc/
 
+
 # nas-anime的web端口
 ENV QB_WEB_URL=http://localhost:8081
 ENV QB_USERNAME=admin
@@ -35,5 +36,7 @@ ENV QB_PASSWORD=adminadmin
 ENV QB_DOWNLOAD_PATH=/downloads
 ENV QB_CATEGORY=meido-anime
 ENV MEDIA_PATH=/meido-anime
+
+VOLUME ["/var/db"]
 
 ENTRYPOINT ["/app"]

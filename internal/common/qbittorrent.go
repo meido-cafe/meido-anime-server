@@ -29,6 +29,7 @@ func NewQB(conf *etc.Config) *QB {
 		//if conf.Env == "dev" || conf.Env == "local" {
 		//	qb.Client = qb.Client.DevMode()
 		//}
+		log.Printf("正在连接 qbittorrent: [url: %s] [username: %s] \n", conf.QB.Url, conf.QB.Username)
 		res, err := qb.Client.R().SetFormDataAnyType(map[string]interface{}{
 			"username": conf.QB.Username,
 			"password": conf.QB.Password,
@@ -72,6 +73,8 @@ func NewQB(conf *etc.Config) *QB {
 				panic(res.String())
 			}
 		}
+
+		log.Println("qbittorrent 连接成功")
 	})
 	return qb
 }

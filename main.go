@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"meido-anime-server/etc"
+	"meido-anime-server/factory"
 	"meido-anime-server/internal/api"
 )
 
@@ -17,6 +18,9 @@ func main() {
 	router := engine.Group("")
 
 	api.InitRouter(router)
+
+	cron := factory.NewCronService()
+	cron.Start()
 
 	if err := engine.Run(fmt.Sprintf("%s:%d", "0.0.0.0", etc.Conf.Server.Port)); err != nil {
 		panic(err)

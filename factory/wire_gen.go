@@ -35,6 +35,20 @@ func NewQB() *common.QB {
 	return qb
 }
 
+// Injectors from cron.go:
+
+func NewCronRepo() *repo.CronRepo {
+	db := NewDB()
+	cronRepo := repo.NewCronRepo(db)
+	return cronRepo
+}
+
+func NewCronService() *service.CronService {
+	cronRepo := NewCronRepo()
+	cronService := service.NewCronService(cronRepo)
+	return cronService
+}
+
 // Injectors from rss.go:
 
 func NewRssRepo() repo.RssInterface {

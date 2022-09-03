@@ -4,6 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"io/ioutil"
+	"log"
 	"meido-anime-server/etc"
 	"sync"
 )
@@ -21,10 +22,12 @@ func NewDB(conf *etc.Config) *sqlx.DB {
 		}
 		db.SetMaxOpenConns(conf.Db.MaxCons)
 
+		log.Println("正在初始化数据库")
 		byt, err := ioutil.ReadFile("./sql/init.sql")
 		if err != nil {
 			panic(err)
 		}
+		log.Println("数据库初始化成功")
 
 		if _, err = db.Exec(string(byt)); err != nil {
 			panic(err)

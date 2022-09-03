@@ -43,9 +43,12 @@ jobs:
 
           script: |
             cd ${{ secrets.DEV_REMOTE_TARGET }}
+            
+            docker stop -v ${{ secrets.DEV_DOCKER_NAME }}
             docker rm -v ${{ secrets.DEV_DOCKER_NAME }}
+            
             docker load -i ${{ secrets.DEV_DOCKER_NAME }}.tar
             
-            docker run -itd --name ${{ secrets.DEV_DOCKER_NAME }} -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -e QB_DOWNLOADS_PATH=/downloads -e MEDIA_PATH=/meido-anime -e QB_CATEGORY=meido -p ${{ secrets.DEV_PROJECT_PORT }}:8081 -v /home/project/meido-anime-server/meido-anime.db:./meido-anime.db ${{ secrets.DEV_DOCKER_NAME }}
+            docker run -itd --name ${{ secrets.DEV_DOCKER_NAME }} -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -e QB_DOWNLOADS_PATH=/downloads -e MEDIA_PATH=/meido-anime -e QB_CATEGORY=meido -p ${{ secrets.DEV_PROJECT_PORT }}:8081 ${{ secrets.DEV_DOCKER_NAME }}
             
             docker image prune -f
