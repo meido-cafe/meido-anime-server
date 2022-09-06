@@ -1,4 +1,4 @@
-package etc
+package config
 
 import (
 	"errors"
@@ -14,9 +14,10 @@ import (
 type Config struct {
 	Env    string `yaml:"env"`
 	Server struct {
-		Port      int    `yaml:"port"`
-		GinMode   string `yaml:"gin_mode"`
-		MediaPath string `yaml:"media_path"`
+		Port       int    `yaml:"port"`
+		GinMode    string `yaml:"gin_mode"`
+		MediaPath  string `yaml:"media_path"`  // 媒体目录 (硬链接目录)
+		SourcePath string `yaml:"source_path"` // 资源目录 (下载目录)
 	} `yaml:"server"`
 	Db struct {
 		Path    string `yaml:"path"`
@@ -27,7 +28,7 @@ type Config struct {
 		Username     string `yaml:"username"`
 		Password     string `yaml:"password"`
 		Category     string `yaml:"category"`
-		DownloadPath string `yaml:"download_path"`
+		DownloadPath string `yaml:"download_path"` // QB下载目录 (QB下载文件时指定的路径)
 	} `yaml:"qbittorrent"`
 }
 
@@ -37,7 +38,7 @@ var configOnce sync.Once
 func marshal(filename string) {
 	var err error
 
-	byt, err := ioutil.ReadFile(filepath.Join("etc", filename+".yaml"))
+	byt, err := ioutil.ReadFile(filepath.Join("config", filename+".yaml"))
 	if err != nil {
 		panic(err)
 	}
@@ -49,8 +50,9 @@ func marshal(filename string) {
 
 func handleLocal() {
 	marshal("local")
-	global.QBDownloadPath = Conf.QB.DownloadPath
 	global.QBCategory = Conf.QB.Category
+	global.QBDownloadPath = Conf.QB.DownloadPath
+	global.SourcePath = Conf.Server.SourcePath
 	global.MediaPath = Conf.Server.MediaPath
 }
 
@@ -61,8 +63,9 @@ func handleDev() {
 	Conf.QB.Username = os.Getenv("QB_USERNAME")
 	Conf.QB.Password = os.Getenv("QB_PASSWORD")
 	Conf.QB.Url = os.Getenv("QB_WEB_URL")
-	global.QBDownloadPath = os.Getenv("QB_DOWNLOAD_PATH")
 	global.QBCategory = os.Getenv("QB_CATEGORY")
+	global.QBDownloadPath = os.Getenv("QB_DOWNLOAD_PATH")
+	global.SourcePath = os.Getenv("SOURCE_PATH")
 	global.MediaPath = os.Getenv("MEDIA_PATH")
 }
 
@@ -72,9 +75,10 @@ func handlePro() {
 	Conf.QB.Username = os.Getenv("QB_USERNAME")
 	Conf.QB.Password = os.Getenv("QB_PASSWORD")
 	Conf.QB.Url = os.Getenv("QB_WEB_URL")
-	global.QBDownloadPath = os.Getenv("QB_DOWNLOAD_PATH")
 	global.QBCategory = os.Getenv("QB_CATEGORY")
+	global.QBDownloadPath = os.Getenv("QB_DOWNLOAD_PATH")
 	global.MediaPath = os.Getenv("MEDIA_PATH")
+	global.SourcePath = os.Getenv("SOURCE_PATH")
 }
 
 func InitConfig() {

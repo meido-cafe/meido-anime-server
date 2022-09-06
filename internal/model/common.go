@@ -18,7 +18,7 @@ func (p *Page) CheckPage() error {
 	}
 	return nil
 }
-func (p *Page) Bool() bool {
+func (p *Page) IsPage() bool {
 	return p.PageSize > 0 && p.Page > 0
 }
 func (p *Page) Data() (limit, offset int) {

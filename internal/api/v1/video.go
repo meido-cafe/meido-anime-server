@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"meido-anime-server/internal/api/response"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/service"
@@ -16,10 +17,15 @@ type VideoApi struct {
 	service *service.VideoService
 }
 
+func (this *VideoApi) Link(ctx *gin.Context) {
+	this.service.Link()
+	response.Success(ctx)
+}
+
 func (this *VideoApi) GetList(ctx *gin.Context) {
 	req := vo.VideoGetListRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
-		response.BadBind(ctx)
+		log.Println(err)
 		return
 	}
 
@@ -39,6 +45,7 @@ func (this *VideoApi) GetList(ctx *gin.Context) {
 func (this *VideoApi) GetOne(ctx *gin.Context) {
 	req := vo.VideoGetOneRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
+		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -58,6 +65,7 @@ func (this *VideoApi) GetOne(ctx *gin.Context) {
 func (this *VideoApi) Subscribe(ctx *gin.Context) {
 	req := vo.VideoSubscribeRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
+		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -99,6 +107,7 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 func (this *VideoApi) DeleteRss(ctx *gin.Context) {
 	req := vo.DeleteRssRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
+		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -117,6 +126,7 @@ func (this *VideoApi) DeleteRss(ctx *gin.Context) {
 func (this *VideoApi) UpdateRss(ctx *gin.Context) {
 	req := vo.UpdateRssRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
+		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}

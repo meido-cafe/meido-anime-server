@@ -1,2 +1,2 @@
 *.exe
-etc/local.yaml
+config/local.yaml

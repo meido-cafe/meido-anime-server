@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"meido-anime-server/internal/api/response"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/service"
@@ -18,6 +19,7 @@ func NewRssApi(service *service.RssService) *RssApi {
 func (this *RssApi) GetMikanInfo(ctx *gin.Context) {
 	req := vo.GetRssInfoMikanRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
+		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -39,6 +41,7 @@ func (this *RssApi) GetMikanInfo(ctx *gin.Context) {
 func (this *RssApi) GetSearch(ctx *gin.Context) {
 	req := vo.GetRssSearchRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
+		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -60,6 +63,7 @@ func (this *RssApi) GetSearch(ctx *gin.Context) {
 func (this *RssApi) GetSubject(ctx *gin.Context) {
 	req := vo.GetRssSubjectRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
+		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}

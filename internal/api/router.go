@@ -18,6 +18,8 @@ func InitRouter(router *gin.RouterGroup) {
 	{
 		r := b.Group("video") // /api/v1/video
 		c := factory.NewVideoApi()
+
+		r.GET("link", c.Link)                 // 手动执行硬链接
 		r.POST("subscribe", c.Subscribe)      // 订阅番剧
 		r.GET("detail", c.GetOne)             // 获取详情
 		r.GET("list", c.GetList)              // 获取番剧列表

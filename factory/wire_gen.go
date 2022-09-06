@@ -8,7 +8,7 @@ package factory
 
 import (
 	"github.com/jmoiron/sqlx"
-	"meido-anime-server/etc"
+	"meido-anime-server/config"
 	"meido-anime-server/internal/api/v1"
 	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/repo"
@@ -19,8 +19,8 @@ import (
 // Injectors from common.go:
 
 func NewDB() *sqlx.DB {
-	config := etc.NewConfig()
-	db := common.NewDB(config)
+	configConfig := config.NewConfig()
+	db := common.NewDB(configConfig)
 	return db
 }
 
@@ -30,23 +30,26 @@ func NewSqlTool() *tool.Sql {
 }
 
 func NewQB() *common.QB {
-	config := etc.NewConfig()
-	qb := common.NewQB(config)
+	configConfig := config.NewConfig()
+	qb := common.NewQB(configConfig)
 	return qb
 }
 
 // Injectors from cron.go:
 
-func NewCronRepo() *repo.CronRepo {
-	db := NewDB()
-	cronRepo := repo.NewCronRepo(db)
-	return cronRepo
+func NewCronService() *service.CronService {
+	videoService := NewVideoService()
+	cronService := service.NewCronService(videoService)
+	return cronService
 }
 
-func NewCronService() *service.CronService {
-	cronRepo := NewCronRepo()
-	cronService := service.NewCronService(cronRepo)
-	return cronService
+// Injectors from init.go:
+
+func NewInitService() *service.InitService {
+	videoService := NewVideoService()
+	cronService := NewCronService()
+	initService := service.NewInitService(videoService, cronService)
+	return initService
 }
 
 // Injectors from rss.go:

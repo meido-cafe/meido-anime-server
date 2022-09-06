@@ -33,8 +33,10 @@ COPY etc/pro.yaml /etc/
 ENV QB_WEB_URL=http://localhost:8081
 ENV QB_USERNAME=admin
 ENV QB_PASSWORD=adminadmin
-ENV QB_DOWNLOAD_PATH=/downloads
 ENV QB_CATEGORY=meido-anime
+ENV QB_DOWNLOAD=/downloads
+
+ENV SOURCE_PATH=/downloads
 ENV MEDIA_PATH=/meido-anime
 
 VOLUME ["/var/db"]

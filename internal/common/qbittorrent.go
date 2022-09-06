@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/imroc/req/v3"
 	"log"
-	"meido-anime-server/etc"
+	"meido-anime-server/config"
 	"meido-anime-server/internal/global"
 	"sync"
 	"time"
@@ -18,7 +18,7 @@ type QB struct {
 	Client *req.Client
 }
 
-func NewQB(conf *etc.Config) *QB {
+func NewQB(conf *config.Config) *QB {
 	qbOnce.Do(func() {
 		qb = new(QB)
 
@@ -36,23 +36,19 @@ func NewQB(conf *etc.Config) *QB {
 		}).Post("/auth/login")
 
 		if err != nil {
-			log.Println("qbittorrent 登录失败")
-			panic(err)
+			log.Fatalln("qbittorrent 登录失败:", err)
 		}
 		if res.IsError() {
-			log.Println("qbittorrent 登录失败")
-			panic(res.String())
+			log.Fatalln("qbittorrent 登录失败:", res.String())
 		}
 
 		res, err = qb.Client.R().Get("/torrents/categories")
 		if err != nil {
-			log.Println(err)
-			panic(err)
+			log.Fatalln("qbittorrent 获取分类信息失败:", err)
 		}
 
 		if res.IsError() {
-			log.Println("获取分类信息失败")
-			panic(res.String())
+			log.Fatalln("qbittorrent 获取分类信息失败:", res.String())
 		}
 
 		hash := make(map[string]struct{})
@@ -65,12 +61,10 @@ func NewQB(conf *etc.Config) *QB {
 				"category": global.QBCategory,
 			}).Post("/torrents/createCategory")
 			if err != nil {
-				log.Println("qbittorrent 创建分类失败")
-				panic(err)
+				log.Fatalln("qbittorrent 创建分类失败:", err)
 			}
 			if res.IsError() {
-				log.Println("qbittorrent 创建分类失败")
-				panic(res.String())
+				log.Fatalln("qbittorrent 创建分类失败:", res.String())
 			}
 		}
 

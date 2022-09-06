@@ -36,8 +36,8 @@ func List(ctx *gin.Context, list any, total int64) {
 		"message": "success",
 		"data": gin.H{
 			"items": list,
+			"total": total,
 		},
-		"total": total,
 	})
 }
 

@@ -8,10 +8,11 @@ import (
 	"meido-anime-server/internal/service"
 )
 
-func NewCronService() (ret *service.CronService) {
+func NewInitService() (ret *service.InitService) {
 	panic(wire.Build(
+		NewCronService,
 		NewVideoService,
-		service.NewCronService,
+		service.NewInitService,
 	))
 	return
 }

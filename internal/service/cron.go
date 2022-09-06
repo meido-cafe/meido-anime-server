@@ -5,28 +5,32 @@ import (
 	"fmt"
 	"github.com/robfig/cron"
 	"log"
-	"meido-anime-server/internal/repo"
 	"reflect"
 	"runtime"
 )
 
 type CronService struct {
-	cron *cron.Cron
-	repo *repo.CronRepo
+	cron         *cron.Cron
+	videoService *VideoService
 }
 
-func NewCronService(cronRepo *repo.CronRepo) *CronService {
+func NewCronService(videoService *VideoService) *CronService {
 	return &CronService{
-		cron: cron.New(),
-		repo: cronRepo,
+		cron:         cron.New(),
+		videoService: videoService,
 	}
 }
 
 func (this *CronService) Start() {
-	if err := this.register(); err != nil {
-		log.Fatalln(err)
+
+	list := []cronFunc{
+		this.handleVideoLink,
 	}
-	this.cron.Run()
+
+	if err := this.register(list...); err != nil {
+		log.Fatalln("定时任务注册失败:", err)
+	}
+	go this.cron.Run()
 }
 
 type producer struct {
@@ -50,4 +54,10 @@ func (this *CronService) register(list ...cronFunc) (err error) {
 		}
 	}
 	return
+}
+
+func (this *CronService) handleVideoLink() producer {
+	return producer{"0 */10 * * * ?", func() {
+		this.videoService.Link()
+	}}
 }
