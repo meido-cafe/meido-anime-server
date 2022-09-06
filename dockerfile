@@ -24,9 +24,9 @@ RUN apk add tzdata && \
 
 COPY --from=builder /build/app /
 COPY sql/init.sql /sql/
-COPY etc/common.yaml /etc/
-COPY etc/dev.yaml /etc/
-COPY etc/pro.yaml /etc/
+COPY config/common.yaml /config/
+COPY config/dev.yaml /config/
+COPY config/pro.yaml /config/
 
 
 # nas-anime的web端口
