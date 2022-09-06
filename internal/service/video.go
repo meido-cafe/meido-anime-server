@@ -97,7 +97,7 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 		Enabled:                   true,
 		MustContain:               request.MustContain,
 		MustNotContain:            request.MustNotContain,
-		UseRegex:                  false,
+		UseRegex:                  request.UseRegex,
 		EpisodeFilter:             request.EpisodeFilter,
 		SmartFilter:               request.SmartFilter,
 		PreviouslyMatchedEpisodes: nil,

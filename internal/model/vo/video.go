@@ -38,6 +38,7 @@ type VideoSubscribeRequest struct {
 
 	MustContain    string `form:"must_contain" json:"must_contain"`         // 必须包含
 	MustNotContain string `form:"must_not_contain" json:"must_not_contain"` // 必须不包含
+	UseRegex       bool   `form:"use_regex" json:"use_regex"`               // 是否开启正则
 	EpisodeFilter  string `form:"episode_filter" json:"episode_filter"`     // 剧集过滤
 	SmartFilter    bool   `form:"smart_filter" json:"smart_filter"`         // 是否开启智能剧集过滤
 }
