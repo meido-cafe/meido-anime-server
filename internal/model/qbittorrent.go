@@ -7,7 +7,7 @@ type QBLog struct {
 	Type      int64  `form:"type" json:"type"`
 }
 
-type QBRule struct {
+type QBDef struct {
 	Enabled                   bool          `json:"enabled"`
 	MustContain               string        `json:"mustContain"`               // 必须包含
 	MustNotContain            string        `json:"mustNotContain"`            // 必须不包含
@@ -21,9 +21,4 @@ type QBRule struct {
 	AddPaused                 bool          `json:"addPaused"`                 // true: 添加后不会立即下载
 	AssignedCategory          string        `json:"assignedCategory"`          // 下载分类
 	SavePath                  string        `json:"savePath"`                  // 下载后的保存路径
-}
-
-type QBSetRule struct {
-	RuleName string `json:"ruleName"`
-	RuleDef  string `json:"ruleDef"`
 }

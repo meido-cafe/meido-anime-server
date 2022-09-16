@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type Page struct {
 	Page     int `form:"page" json:"page"`
@@ -30,6 +33,14 @@ type Time struct {
 	UpdateTime int64 `json:"update_time" db:"update_time"`
 }
 
+func NewTime() Time {
+	now := time.Now().Unix()
+	return Time{
+		CreateTime: now,
+		UpdateTime: now,
+	}
+}
+
 type Feed struct {
 	Title string     `json:"title"` // rss标题
 	Desc  string     `json:"desc"`  // rss描述
@@ -42,4 +53,9 @@ type FeedItem struct {
 	PubDate string `json:"pub_date"` // 发布日期
 	Url     string `json:"url"`      // 种子链接
 	Length  int    `json:"length"`   // 内容大小, 单位B
+}
+
+type UpdatePath struct {
+	OldPath string
+	NewPath string
 }

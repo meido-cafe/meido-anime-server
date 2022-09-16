@@ -2,7 +2,6 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
 	"meido-anime-server/internal/api/response"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/service"
@@ -25,7 +24,7 @@ func (this *VideoApi) Link(ctx *gin.Context) {
 func (this *VideoApi) GetList(ctx *gin.Context) {
 	req := vo.VideoGetListRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
-		log.Println(err)
+		response.BadBind(ctx)
 		return
 	}
 
@@ -45,7 +44,6 @@ func (this *VideoApi) GetList(ctx *gin.Context) {
 func (this *VideoApi) GetOne(ctx *gin.Context) {
 	req := vo.VideoGetOneRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
-		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -61,11 +59,9 @@ func (this *VideoApi) GetOne(ctx *gin.Context) {
 	response.Data(ctx, res)
 }
 
-// 有bangumi 订阅rss
 func (this *VideoApi) Subscribe(ctx *gin.Context) {
 	req := vo.VideoSubscribeRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
-		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -80,6 +76,19 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 	case req.Title == "":
 		response.Bad(ctx, "番剧名称不能为空")
 		return
+	case req.Category == 0:
+		response.Bad(ctx, "分类不能为空")
+		return
+	}
+	category, err := this.service.GetCategory(req.Category)
+	if err != nil {
+		response.Error(ctx, "订阅失败")
+		return
+	}
+
+	if category.Id == 0 {
+		response.Bad(ctx, "不存在的分类")
+		return
 	}
 
 	exist, err := this.service.GetOne(vo.VideoGetOneRequest{
@@ -88,7 +97,7 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		response.Error(ctx, "下载记录添加失败")
+		response.Error(ctx, "订阅失败")
 		return
 	}
 
@@ -98,16 +107,15 @@ func (this *VideoApi) Subscribe(ctx *gin.Context) {
 	}
 
 	if err := this.service.Subscribe(req); err != nil {
-		response.Error(ctx, "下载记录添加失败")
+		response.Error(ctx, "订阅失败")
 		return
 	}
 	response.Success(ctx)
 }
 
-func (this *VideoApi) DeleteRss(ctx *gin.Context) {
-	req := vo.DeleteRssRequest{}
+func (this *VideoApi) DeleteVideo(ctx *gin.Context) {
+	req := vo.DeleteVideoRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
-		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
@@ -115,43 +123,143 @@ func (this *VideoApi) DeleteRss(ctx *gin.Context) {
 		response.Bad(ctx, "id不能为空")
 		return
 	}
-	if err := this.service.DeleteRss(req); err != nil {
-		response.Error(ctx, "")
+	if err := this.service.DeleteVideo(req); err != nil {
+		response.Error(ctx, "删除订阅失败")
 		return
 	}
 
 	response.Success(ctx)
 }
 
-func (this *VideoApi) UpdateRss(ctx *gin.Context) {
-	req := vo.UpdateRssRequest{}
+func (this *VideoApi) UpdateVideoCategory(ctx *gin.Context) {
+	req := vo.UpdateVideoCategoryRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
-		log.Println(err)
 		response.BadBind(ctx)
 		return
 	}
-	if req.Id == 0 {
-		response.Bad(ctx, "id不能为空")
+
+	switch {
+	case len(req.Ids) == 0:
+		response.Bad(ctx, "ID不能为空")
 		return
-	}
-	if req.Rss == "" {
-		response.Bad(ctx, "rss链接不能为空")
-		return
-	}
-	if err := this.service.UpdateRss(req); err != nil {
-		response.Error(ctx, "")
+	case req.Category == 0:
+		response.Bad(ctx, "分类不能为空")
 		return
 	}
 
-	response.Success(ctx)
-
-}
-
-func (this *VideoApi) GetQBLogs(ctx *gin.Context) {
-	logs, err := this.service.GetQBLogs()
+	category, err := this.service.GetCategory(req.Category)
 	if err != nil {
-		response.Error(ctx, "获取日志失败")
+		response.Bad(ctx, "更新失败")
 		return
 	}
-	response.List(ctx, logs.Items, logs.Total)
+	if category.Id == 0 {
+		response.Bad(ctx, "分类不存在")
+		return
+	}
+
+	if err = this.service.UpdateVideoCategory(req); err != nil {
+		response.Error(ctx, "更新失败")
+		return
+	}
+
+	response.Success(ctx)
+	return
+}
+
+func (this *VideoApi) CreateCategory(ctx *gin.Context) {
+	req := vo.CreateCategoryRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+	if req.Name == "" {
+		response.Bad(ctx, "分类名称不能为空")
+		return
+	}
+
+	category, err := this.service.GetCategoryByName(req.Name)
+	if err != nil {
+		response.Error(ctx, "创建失败")
+		return
+	}
+
+	if category.Id > 0 {
+		response.Bad(ctx, "分类已存在")
+		return
+	}
+
+	if err := this.service.CreateCategory(req); err != nil {
+		response.Error(ctx, "创建失败")
+		return
+	}
+	response.Success(ctx)
+	return
+}
+
+func (this *VideoApi) GetCategoryList(ctx *gin.Context) {
+	list, err := this.service.GetCategoryList()
+	if err != nil {
+		response.Error(ctx, "获取失败")
+		return
+	}
+	response.List(ctx, list, len(list))
+	return
+}
+
+func (this *VideoApi) DeleteCategory(ctx *gin.Context) {
+	req := vo.DeleteCategoryRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+	if req.Id == 0 {
+		response.Bad(ctx, "ID不能为空")
+		return
+	}
+
+	if err := this.service.DeleteCategory(req.Id); err != nil {
+		response.Error(ctx, "删除失败")
+		return
+	}
+	response.Success(ctx)
+	return
+}
+
+func (this *VideoApi) UpdateCategoryName(ctx *gin.Context) {
+	req := vo.UpdateCategoryNameRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+
+	switch {
+	case req.Id == 0:
+		response.Bad(ctx, "ID不能为空")
+		return
+	case req.Name == "":
+		response.Bad(ctx, "分类名称不能为空")
+		return
+	}
+
+	result, err := this.service.GetCategoryByName(req.Name)
+	if err != nil {
+		response.Error(ctx, "更新失败")
+		return
+	}
+	if result.Id > 0 {
+		if result.Id == req.Id {
+			response.Success(ctx)
+			return
+		}
+		response.Bad(ctx, "分类已存在")
+		return
+	}
+
+	// 更新
+	if err = this.service.UpdateCategoryName(req); err != nil {
+		response.Error(ctx, "更新失败")
+		return
+	}
+	response.Success(ctx)
+	return
 }

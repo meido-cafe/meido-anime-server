@@ -55,10 +55,28 @@ type VideoAddTorrent struct {
 	TorrentList []string `json:"torrent_list"` // 种子列表
 }
 
-type DeleteRssRequest struct {
-	Id int64 `form:"id" json:"id"`
+type DeleteVideoRequest struct {
+	Id         int64 `form:"id" json:"id"`
+	DeleteFile bool  `form:"delete_file" json:"delete_file"`
 }
 type UpdateRssRequest struct {
 	Id  int64  `form:"id" json:"id"`
 	Rss string `form:"rss" json:"rss"`
+}
+
+type CreateCategoryRequest struct {
+	Name string `json:"name"`
+}
+
+type UpdateVideoCategoryRequest struct {
+	Ids      []int64 `form:"ids" json:"ids"`
+	Category int64   `form:"category" json:"category"`
+}
+
+type DeleteCategoryRequest struct {
+	Id int64 `form:"id" json:"id"`
+}
+type UpdateCategoryNameRequest struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
 }

@@ -9,22 +9,25 @@ func NewQuery() *Query {
 }
 
 func (p *Query) Add(data ...any) {
-	//switch data.(type) {
-	//case []string:
-	//	for _, item := range data.([]string) {
-	//		p.values = append(p.values, item)
-	//	}
-	//case []int64:
-	//	for _, item := range data.([]int64) {
-	//		p.values = append(p.values, item)
-	//	}
-	//case []int:
-	//	for _, item := range data.([]int) {
-	//		p.values = append(p.values, item)
-	//	}
-	//default:
-	p.values = append(p.values, data...)
-	//}
+	for _, item := range data {
+		switch item.(type) {
+		case []string:
+			for _, item := range item.([]string) {
+				p.values = append(p.values, item)
+			}
+		case []int64:
+			for _, item := range item.([]int64) {
+				p.values = append(p.values, item)
+			}
+		case []int:
+			for _, item := range item.([]int) {
+				p.values = append(p.values, item)
+			}
+		default:
+			p.values = append(p.values, item)
+		}
+	}
+
 }
 
 func (p *Query) Values() []any {

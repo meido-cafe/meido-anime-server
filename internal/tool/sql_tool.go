@@ -12,6 +12,11 @@ func NewSql() *Sql {
 	return &Sql{}
 }
 
+type Result struct {
+	Sql    string
+	Values []any
+}
+
 // FormatList 格式化 in 关键词的列表参数
 //
 // @auth roirea 2022-07-17 22:47:32
@@ -33,36 +38,16 @@ func (p *Sql) FormatList(n int) string {
 	return sql.String()
 }
 
-// FormatConflict 格式化 conflict sql语句
+// CountSql 获取对sql查询结果进行count(*)的sql语句
 //
-// @auth roirea 2022-07-17 22:40:58
-// @param
-//	key []string 唯一约束键
-//	field []string 重复则更新的字段
+// @auth roirea 2022-08-14 21:56:59
+// @params
+//	sql string 要进行count(*)的sql语句
 // @return
-//	string 生成的conflict sql语句
-//	error
-func (p *Sql) FormatConflict(key []string, field []string) (string, error) {
-	if len(key) <= 0 {
-		return "", errors.New("唯一约束键为空")
-	}
-	if len(field) <= 0 {
-		return "", errors.New("更新字段为空")
-	}
-	builder := new(strings.Builder)
-	builder.WriteString(" on conflict ( ")
-	builder.WriteString(strings.Join(key, ","))
-	builder.WriteString(" ) do update set ")
-
-	for i, item := range field {
-		builder.WriteString(item)
-		builder.WriteString("=excluded.")
-		builder.WriteString(item)
-		if i < len(field)-1 {
-			builder.WriteString(",")
-		}
-	}
-	return builder.String(), nil
+//	string 生成的sql语句
+func (p *Sql) CountSql(sql string) string {
+	str := `select count(*) from (` + sql + `) count_sql`
+	return str
 }
 
 // FormatInsert 格式化插入sql语句
@@ -75,13 +60,15 @@ func (p *Sql) FormatConflict(key []string, field []string) (string, error) {
 //	string 生成的sql语句
 //	[]interface{} 执行参数
 //	error
-func (p *Sql) FormatInsert(tableName string, data map[string]any) (string, []any, error) {
+func (p *Sql) FormatInsert(tableName string, data map[string]any) (ret Result, err error) {
 	if tableName == "" {
-		return "", nil, errors.New("insert sql 表名为空")
+		err = errors.New("insert sql 表名为空")
+		return
 	}
 	n := len(data)
 	if n == 0 {
-		return "", nil, errors.New("insert sql 参数为空")
+		err = errors.New("insert sql 参数为空")
+		return
 	}
 
 	values := make([]any, 0, n)
@@ -100,7 +87,10 @@ func (p *Sql) FormatInsert(tableName string, data map[string]any) (string, []any
 	sql.WriteString(strings.Join(fields, ","))
 	sql.WriteString(" ) values ")
 	sql.WriteString(p.FormatList(n))
-	return sql.String(), values, nil
+
+	ret.Sql = sql.String()
+	ret.Values = values
+	return
 }
 
 // FormatInsertBatch 构造批量插入SQL语句
@@ -113,13 +103,15 @@ func (p *Sql) FormatInsert(tableName string, data map[string]any) (string, []any
 //	string 生成的sql语句
 //	[]interface{} 执行参数
 //	error
-func (p *Sql) FormatInsertBatch(tableName string, list []map[string]any) (string, []any, error) {
+func (p *Sql) FormatInsertBatch(tableName string, list []map[string]any) (ret Result, err error) {
 	if tableName == "" {
-		return "", nil, errors.New("insert sql 表名为空")
+		err = errors.New("insert sql 表名为空")
+		return
 	}
 	n := len(list) // 参数列表的长度
 	if n == 0 {
-		return "", nil, errors.New("insert list sql 参数为空")
+		err = errors.New("insert list sql 参数为空")
+		return
 	}
 	m := len(list[0]) // 字段数量
 
@@ -165,67 +157,7 @@ func (p *Sql) FormatInsertBatch(tableName string, list []map[string]any) (string
 		placeholderAll = append(placeholderAll, placeholder)
 	}
 	builder.WriteString(strings.Join(placeholderAll, ","))
-	return builder.String(), values, nil
-}
-
-// FormatInsertConflict 构造存在就更新的插入SQL语句
-//
-// @auth roirea 2022-07-17 22:44:47
-// @params
-//	tableName string	表名
-//	data map[string]interface{}	key为字段名,value为值的参数哈希表
-//	key []string	on conflict 约束键
-//	updateList []string	要更新的字段列表, 字段1=excluded.字段1
-// @return
-//	string	生成的sql语句
-//	[]interface{} 用于执行的参数列表
-//	error
-func (p *Sql) FormatInsertConflict(tableName string, data map[string]any, key []string, updateList []string) (string, []any, error) {
-	sql, values, err := p.FormatInsert(tableName, data)
-	if err != nil {
-		return "", nil, err
-	}
-
-	csql, err := p.FormatConflict(key, updateList)
-	if err != nil {
-		return "", nil, err
-	}
-
-	return sql + csql, values, nil
-}
-
-// FormatInsertBatchConflict 构造批量存在就更新的插入SQL语句
-//
-// @auth roirea 2022-07-17 22:46:00
-// @params
-//	tableName string	表名
-//	list []map[string]interface{}	参数列表,key为字段名,value为值
-//	key []string	on conflict 约束键
-//	updateList []string	要更新的字段列表, 字段1=excluded.字段1
-// @return
-//	string	生成的sql语句
-//	[]interface{} 用于执行的参数列表
-//	error
-func (p *Sql) FormatInsertBatchConflict(tableName string, list []map[string]any, key []string, updateList []string) (string, []any, error) {
-	sql, value, err := p.FormatInsertBatch(tableName, list)
-	if err != nil {
-		return "", nil, err
-	}
-	csql, err := p.FormatConflict(key, updateList)
-	if err != nil {
-		return "", nil, err
-	}
-	return sql + csql, value, err
-}
-
-// CountSql 获取对sql查询结果进行count(*)的sql语句
-//
-// @auth roirea 2022-08-14 21:56:59
-// @params
-//	sql string 要进行count(*)的sql语句
-// @return
-//	string 生成的sql语句
-func (p *Sql) CountSql(sql string) string {
-	str := `select count(*) from (` + sql + `) count_sql`
-	return str
+	ret.Sql = builder.String()
+	ret.Values = values
+	return
 }

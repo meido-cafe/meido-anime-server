@@ -11,8 +11,10 @@ create table if not exists video
     cover         text    default '' not null,
     total         integer default 0 not null,
     rss_url       text    default '' not null,
+    rule_name     text    default '' not null,
     play_time     integer default 0 not null,
     source_dir    text    default '' not null,
+    link_dir      text    default '' not null,
     create_time   integer default 0 not null,
     update_time   integer default 0 not null
 );
@@ -29,4 +31,15 @@ create table if not exists video_item
     link_path   text    default '' not null,
     create_time integer default 0 not null,
     update_time integer default 0 not null
+);
+
+create table if not exists category
+(
+    id          INTEGER
+        primary key autoincrement,
+    name        TEXT    default '' not null
+        unique,
+    origin      INTEGER default 2  not null,
+    create_time INTEGER default 0  not null,
+    update_time INTEGER default 0  not null
 );

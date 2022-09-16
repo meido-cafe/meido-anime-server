@@ -15,7 +15,7 @@ func NewInitService(videoService *VideoService, cronService *CronService) *InitS
 }
 
 func (this *InitService) Init() {
-	if err := this.videoService.CacheSourcePath(); err != nil {
+	if err := this.videoService.CacheLinkPath(); err != nil {
 		log.Println("缓存硬链接资源路径失败:", err)
 	}
 

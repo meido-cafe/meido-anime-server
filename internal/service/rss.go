@@ -4,7 +4,6 @@ import (
 	"github.com/gocolly/colly/v2"
 	"log"
 	"meido-anime-server/internal/model/vo"
-	"meido-anime-server/internal/repo"
 	"meido-anime-server/internal/tool"
 	"net/url"
 	"strconv"
@@ -12,11 +11,10 @@ import (
 )
 
 type RssService struct {
-	repo repo.RssInterface
 }
 
-func NewRssService(repo repo.RssInterface) *RssService {
-	return &RssService{repo: repo}
+func NewRssService() *RssService {
+	return &RssService{}
 }
 
 func (this *RssService) GetInfoMikan(request vo.GetRssInfoMikanRequest) (response vo.GetRssMiaknInfoResponse, err error) {

@@ -30,7 +30,7 @@ func Data(ctx *gin.Context, data any) {
 	})
 }
 
-func List(ctx *gin.Context, list any, total int64) {
+func List[T int | int64](ctx *gin.Context, list any, total T) {
 	ctx.JSON(200, gin.H{
 		"code":    200,
 		"message": "success",

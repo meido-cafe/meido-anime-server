@@ -7,6 +7,7 @@
 package factory
 
 import (
+	"github.com/imroc/req/v3"
 	"github.com/jmoiron/sqlx"
 	"meido-anime-server/config"
 	"meido-anime-server/internal/api/v1"
@@ -16,12 +17,43 @@ import (
 	"meido-anime-server/internal/tool"
 )
 
+// Injectors from bangumi.go:
+
+func NewBangumiRepo() *repo.BangumiRepo {
+	client := NewBangumiClient()
+	bangumiRepo := repo.NewBangumiRepo(client)
+	return bangumiRepo
+}
+
+func NewBangumiService() *service.BangumiService {
+	bangumiRepo := NewBangumiRepo()
+	bangumiService := service.NewBangumiService(bangumiRepo)
+	return bangumiService
+}
+
+func NewBangumiApi() *v1.BangumiApi {
+	bangumiService := NewBangumiService()
+	bangumiApi := v1.NewBangumiApi(bangumiService)
+	return bangumiApi
+}
+
 // Injectors from common.go:
 
-func NewDB() *sqlx.DB {
+func NewConfig() *config.Config {
 	configConfig := config.NewConfig()
+	return configConfig
+}
+
+func NewDB() *sqlx.DB {
+	configConfig := NewConfig()
 	db := common.NewDB(configConfig)
 	return db
+}
+
+func NewDBClient() common.DBClient {
+	db := NewDB()
+	dbClient := common.NewDBClient(db)
+	return dbClient
 }
 
 func NewSqlTool() *tool.Sql {
@@ -30,9 +62,14 @@ func NewSqlTool() *tool.Sql {
 }
 
 func NewQB() *common.QB {
-	configConfig := config.NewConfig()
+	configConfig := NewConfig()
 	qb := common.NewQB(configConfig)
 	return qb
+}
+
+func NewBangumiClient() *req.Client {
+	client := common.NewBangumiClient()
+	return client
 }
 
 // Injectors from cron.go:
@@ -54,15 +91,8 @@ func NewInitService() *service.InitService {
 
 // Injectors from rss.go:
 
-func NewRssRepo() repo.RssInterface {
-	db := NewDB()
-	rssInterface := repo.NewRssRepo(db)
-	return rssInterface
-}
-
 func NewRssService() *service.RssService {
-	rssInterface := NewRssRepo()
-	rssService := service.NewRssService(rssInterface)
+	rssService := service.NewRssService()
 	return rssService
 }
 
@@ -72,19 +102,27 @@ func NewRssApi() *v1.RssApi {
 	return rssApi
 }
 
+// Injectors from torrent_client.go:
+
+func NewQbittorrentClient() repo.TorrentClientInterface {
+	qb := NewQB()
+	torrentClientInterface := repo.NewQbittorrent(qb)
+	return torrentClientInterface
+}
+
 // Injectors from video.go:
 
 func NewVideoRepo() repo.VideoInterface {
-	db := NewDB()
+	dbClient := NewDBClient()
 	sql := NewSqlTool()
-	qb := NewQB()
-	videoInterface := repo.NewVideoRepo(db, sql, qb)
+	videoInterface := repo.NewVideoRepo(dbClient, sql)
 	return videoInterface
 }
 
 func NewVideoService() *service.VideoService {
 	videoInterface := NewVideoRepo()
-	videoService := service.NewVideoService(videoInterface)
+	torrentClientInterface := NewQbittorrentClient()
+	videoService := service.NewVideoService(videoInterface, torrentClientInterface)
 	return videoService
 }
 

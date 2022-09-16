@@ -10,28 +10,26 @@ import (
 	"meido-anime-server/internal/service"
 )
 
-func NewVideoRepo() (ret repo.VideoInterface) {
+func NewBangumiRepo() (ret *repo.BangumiRepo) {
 	panic(wire.Build(
-		NewDBClient,
-		NewSqlTool,
-		repo.NewVideoRepo,
+		NewBangumiClient,
+		repo.NewBangumiRepo,
 	))
 	return
 }
 
-func NewVideoService() (ret *service.VideoService) {
+func NewBangumiService() (ret *service.BangumiService) {
 	panic(wire.Build(
-		NewVideoRepo,
-		NewQbittorrentClient,
-		service.NewVideoService,
+		NewBangumiRepo,
+		service.NewBangumiService,
 	))
 	return
 }
 
-func NewVideoApi() (ret *v1.VideoApi) {
+func NewBangumiApi() (ret *v1.BangumiApi) {
 	panic(wire.Build(
-		NewVideoService,
-		v1.NewVideoApi,
+		NewBangumiService,
+		v1.NewBangumiApi,
 	))
 	return
 }
