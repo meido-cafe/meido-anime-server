@@ -2,22 +2,18 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"log"
 	"meido-anime-server/internal/api/response"
-	"meido-anime-server/internal/global"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
-	"meido-anime-server/internal/tool"
-	"os"
-	"time"
+	"meido-anime-server/internal/service"
 )
 
 type UserApi struct {
+	service *service.UserService
 }
 
-func NewUserApi() *UserApi {
-	return &UserApi{}
+func NewUserApi(userService *service.UserService) *UserApi {
+	return &UserApi{service: userService}
 }
 
 func (this *UserApi) Login(ctx *gin.Context) {
@@ -27,39 +23,19 @@ func (this *UserApi) Login(ctx *gin.Context) {
 		return
 	}
 
-	username := os.Getenv("USERNAME")
-	md5Username := tool.MD5Salt(username, global.Salt, 1)
-	if req.Username != md5Username {
-		log.Println(md5Username)
-		response.Bad(ctx, "用户名或密码错误")
+	if req.Username == "" || req.Password == "" {
+		response.Bad(ctx, "用户名或密码不能为空")
 		return
 	}
 
-	password := os.Getenv("PASSWORD")
-	md5pwd := tool.MD5Salt(password, global.Salt, 2)
-	if req.Password != md5pwd {
-		log.Println(md5pwd)
-		response.Bad(ctx, "用户名或密码错误")
+	token, err := this.service.Login(req, model.User{
+		UserAgent: ctx.GetHeader("User-Agent"),
+		Ip:        ctx.ClientIP(),
+	})
+	if err != nil {
+		response.Bad(ctx, err.Error())
 		return
 	}
-
-	// 生成token
-	token := uuid.New().String()
-
-	now := time.Now()
-	nowString := now.Format("2006-01-02 15:04:05")
-	unix := now.Unix()
-	userAgent := ctx.Request.Header.Get("User-Agent")
-	ip := ctx.ClientIP()
-	// 缓存token
-	global.TokenCache[token] = &model.User{
-		LoginTime: unix,
-		TokenTime: unix,
-		UserAgent: userAgent,
-		Ip:        ip,
-	}
-
-	log.Printf("[%s][%s][%s] login \n", nowString, ip, userAgent)
 
 	response.Data(ctx, gin.H{
 		"token": token,
@@ -67,11 +43,6 @@ func (this *UserApi) Login(ctx *gin.Context) {
 }
 
 func (this *UserApi) Logout(ctx *gin.Context) {
-	token := ctx.GetHeader("token")
-	delete(global.TokenCache, token)
+	this.service.Logout(ctx.GetHeader("token"))
 	response.Success(ctx)
-}
-
-func (this *UserApi) UpdateUsername(ctx *gin.Context) {
-
 }
