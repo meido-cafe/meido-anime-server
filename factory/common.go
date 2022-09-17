@@ -9,6 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"meido-anime-server/config"
 	"meido-anime-server/internal/common"
+	"meido-anime-server/internal/middleware"
 	"meido-anime-server/internal/tool"
 )
 
@@ -17,6 +18,13 @@ func NewConfig() (ret *config.Config) {
 		config.NewConfig,
 	))
 	return
+}
+
+func NewMiddleware() *middleware.Middleware {
+	panic(wire.Build(
+		NewConfig,
+		middleware.NewMiddleware,
+	))
 }
 
 func NewDB() (ret *sqlx.DB) {

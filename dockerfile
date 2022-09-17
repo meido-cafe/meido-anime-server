@@ -36,6 +36,8 @@ ENV QB_PASSWORD=adminadmin
 ENV QB_CATEGORY=meido-anime
 ENV QB_DOWNLOAD=/downloads
 
+ENV USERNME=admin
+ENV PASSWORD=admin
 ENV SOURCE_PATH=/downloads
 ENV MEDIA_PATH=/meido-anime
 

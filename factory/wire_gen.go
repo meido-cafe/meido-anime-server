@@ -12,6 +12,7 @@ import (
 	"meido-anime-server/config"
 	"meido-anime-server/internal/api/v1"
 	"meido-anime-server/internal/common"
+	"meido-anime-server/internal/middleware"
 	"meido-anime-server/internal/repo"
 	"meido-anime-server/internal/service"
 	"meido-anime-server/internal/tool"
@@ -42,6 +43,12 @@ func NewBangumiApi() *v1.BangumiApi {
 func NewConfig() *config.Config {
 	configConfig := config.NewConfig()
 	return configConfig
+}
+
+func NewMiddleware() *middleware.Middleware {
+	configConfig := NewConfig()
+	middlewareMiddleware := middleware.NewMiddleware(configConfig)
+	return middlewareMiddleware
 }
 
 func NewDB() *sqlx.DB {
@@ -108,6 +115,13 @@ func NewQbittorrentClient() repo.TorrentClientInterface {
 	qb := NewQB()
 	torrentClientInterface := repo.NewQbittorrent(qb)
 	return torrentClientInterface
+}
+
+// Injectors from user.go:
+
+func NewUserApi() *v1.UserApi {
+	userApi := v1.NewUserApi()
+	return userApi
 }
 
 // Injectors from video.go:

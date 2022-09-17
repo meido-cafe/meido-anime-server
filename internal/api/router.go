@@ -8,10 +8,20 @@ import (
 func InitRouter(router *gin.RouterGroup) {
 	videoApi := factory.NewVideoApi()
 	rssApi := factory.NewRssApi()
+	userApi := factory.NewUserApi()
 	bangumiApi := factory.NewBangumiApi()
+	middleware := factory.NewMiddleware()
 
 	base := router.Group("/api")
 	b := base.Group("v1")
+	{
+		r := b.Group("user")
+		r.POST("login", userApi.Login)                               // 登录
+		r.GET("logout", middleware.Auth(), userApi.Logout)           // 退出
+		r.PUT("username", middleware.Auth(), userApi.UpdateUsername) // 更新用户名
+	}
+
+	b.Use(middleware.Auth())
 	{
 		r := b.Group("rss")                      // /api/v1/rss
 		r.GET("info/mikan", rssApi.GetMikanInfo) // 获取mikan的番剧信息

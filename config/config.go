@@ -14,10 +14,11 @@ import (
 type Config struct {
 	Env    string `yaml:"env"`
 	Server struct {
-		Port       int    `yaml:"port"`
-		GinMode    string `yaml:"gin_mode"`
-		MediaPath  string `yaml:"media_path"`  // 媒体目录 (硬链接目录)
-		SourcePath string `yaml:"source_path"` // 资源目录 (下载目录)
+		Port                int    `yaml:"port"`
+		GinMode             string `yaml:"gin_mode"`
+		TokenExpirationTime int64  `yaml:"token_expiration_time"` // token过期时间
+		MediaPath           string `yaml:"media_path"`            // 媒体目录 (硬链接目录)
+		SourcePath          string `yaml:"source_path"`           // 资源目录 (下载目录)
 	} `yaml:"server"`
 	Db struct {
 		Path    string `yaml:"path"`

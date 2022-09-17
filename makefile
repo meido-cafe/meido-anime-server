@@ -4,4 +4,4 @@ wire:
 
 .PHONY: run
 run:
-	@go run main.go
+	@USERNAME=admin PASSWORD=admin go run main.go
