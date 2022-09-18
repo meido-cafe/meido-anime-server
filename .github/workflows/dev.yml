@@ -58,7 +58,6 @@ jobs:
             
             docker load -i ${{ env.DOCKER_NAME }}.tar
             
-            docker run -d --name ${{ env.DOCKER_NAME }} -v ${{ env.REMOTE_PROJECT_DIR }}/config:/config -v ${{ env.REMOTE_PROJECT_DIR }}/meido-anime.db:/meido-anime.db -v ${{ env.REMOTE_QB_DOWNLOADS_DIR }}:/downloads -e QB_CATEGORY=meido -e QB_DOWNLOADS_PATH=/downloads -e SOURCE_PATH=/downloads -v ${{ env.REMOTE_MEDIA_DIR }}:/media -e MEDIA_PATH=/media -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -e USERNAME=${{ secrets.DEV_QB_USERNAME }} -e PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -p ${{ secrets.DEV_PROJECT_PORT }}:8081 
-            ${{ env.DOCKER_NAME }}
+            docker run -d --name ${{ env.DOCKER_NAME }} -v ${{ env.REMOTE_PROJECT_DIR }}/config:/config -v ${{ env.REMOTE_PROJECT_DIR }}/meido-anime.db:/meido-anime.db -v ${{ env.REMOTE_QB_DOWNLOADS_DIR }}:/downloads -e QB_CATEGORY=meido -e QB_DOWNLOADS_PATH=/downloads -e SOURCE_PATH=/downloads -v ${{ env.REMOTE_MEDIA_DIR }}:/media -e MEDIA_PATH=/media -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -e USERNAME=${{ secrets.DEV_QB_USERNAME }} -e PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -p ${{ secrets.DEV_PROJECT_PORT }}:8081 ${{ env.DOCKER_NAME }}
             
             docker image prune -f
