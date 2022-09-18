@@ -13,7 +13,7 @@ jobs:
     env:
       DOCKER_NAME: meido-anime-server
       REMOTE_PROJECT_DIR: /home/project/meido-anime-server
-      REMOTE_DOCKER_DIR: ${{ env.REMOTE_PROJECT_DIR }}/docker-image
+      REMOTE_DOCKER_DIR: /home/project/meido-anime-server/docker-image
       REMOTE_MEDIA_DIR: /home/media/meido-anime
       REMOTE_QB_DOWNLOADS_DIR: /home/docker/qbittorrent/downloads
 
