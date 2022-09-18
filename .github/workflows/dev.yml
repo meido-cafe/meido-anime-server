@@ -10,15 +10,24 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_NAME: meido-anime-server
+      REMOTE_PROJECT_DIR: /home/project/meido-anime-server
+      REMOTE_DOCKER_DIR: ${{ env.REMOTE_PROJECT_DIR }}/docker-image
+      REMOTE_MEDIA_DIR: /home/media/meido-anime
+      REMOTE_QB_DOWNLOADS_DIR: /home/docker/qbittorrent/downloads
+
+
+
     steps:
       - name: checkout
         uses: actions/checkout@v3
 
       - name: docker build image
         run: |
-          docker build -t ${{ secrets.DEV_DOCKER_NAME }} .
+          docker build -t ${{ env.DOCKER_NAME }} .
       - name: docker save image
-        run: docker save -o ${{ secrets.DEV_DOCKER_NAME }}.tar ${{ secrets.DEV_DOCKER_NAME }}
+        run: docker save -o ${{ env.DOCKER_NAME }}.tar ${{ env.DOCKER_NAME }}
 
       - name: scp docker image
         uses: appleboy/scp-action@master
@@ -28,8 +37,8 @@ jobs:
           username: ${{ secrets.DEV_REMOTE_USERNAME }}
           port: ${{ secrets.DEV_REMOTE_PORT }}
 
-          source: "${{ secrets.DEV_DOCKER_NAME }}.tar"
-          target: ${{ secrets.DEV_REMOTE_TARGET }}
+          source: "${{ env.DOCKER_NAME }}.tar"
+          target: ${{ env.REMOTE_DOCKER_DIR }}
           rm: true
 
 
@@ -42,14 +51,14 @@ jobs:
           port: ${{ secrets.DEV_REMOTE_PORT }}
 
           script: |
-            cd ${{ secrets.DEV_REMOTE_TARGET }}
+            cd ${{ env.REMOTE_DOCKER_DIR }}
             
-            docker stop ${{ secrets.DEV_DOCKER_NAME }}
-            docker rm ${{ secrets.DEV_DOCKER_NAME }}
+            docker stop ${{ env.DOCKER_NAME }}
+            docker rm ${{ env.DOCKER_NAME }}
             
-            docker load -i ${{ secrets.DEV_DOCKER_NAME }}.tar
+            docker load -i ${{ env.DOCKER_NAME }}.tar
             
-            docker run -d --name ${{ secrets.DEV_DOCKER_NAME }} -v /home/docker/qbittorrent/downloads:/downloads -e SOURCE_PATH=/downloads -v /home/media/meido-anime:/media -e MEDIA_PATH=/media -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -e QB_CATEGORY=meido -e QB_DOWNLOADS_PATH=/downloads -e USERNAME=${{ secrets.DEV_QB_USERNAME }} -e PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -p ${{ secrets.DEV_PROJECT_PORT }}:8081 
-            ${{ secrets.DEV_DOCKER_NAME }}
+            docker run -d --name ${{ env.DOCKER_NAME }} -v ${{ env.REMOTE_PROJECT_DIR }}/config:/config -v ${{ env.REMOTE_PROJECT_DIR }}/meido-anime.db:/meido-anime.db -v ${{ env.REMOTE_QB_DOWNLOADS_DIR }}:/downloads -e QB_CATEGORY=meido -e QB_DOWNLOADS_PATH=/downloads -e SOURCE_PATH=/downloads -v ${{ env.REMOTE_MEDIA_DIR }}:/media -e MEDIA_PATH=/media -e QB_WEB_URL=${{ secrets.DEV_QB_WEB_URL }} -e QB_USERNAME=${{ secrets.DEV_QB_USERNAME }} -e QB_PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -e USERNAME=${{ secrets.DEV_QB_USERNAME }} -e PASSWORD=${{ secrets.DEV_QB_PASSWORD }} -p ${{ secrets.DEV_PROJECT_PORT }}:8081 
+            ${{ env.DOCKER_NAME }}
             
             docker image prune -f

@@ -16,9 +16,8 @@ func InitRouter(router *gin.RouterGroup) {
 	b := base.Group("v1")
 	{
 		r := b.Group("user")
-		r.POST("login", userApi.Login)                               // 登录
-		r.GET("logout", middleware.Auth(), userApi.Logout)           // 退出
-		r.PUT("username", middleware.Auth(), userApi.UpdateUsername) // 更新用户名
+		r.POST("login", userApi.Login)                     // 登录
+		r.GET("logout", middleware.Auth(), userApi.Logout) // 退出
 	}
 
 	b.Use(middleware.Auth())

@@ -10,8 +10,8 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
 	config.InitConfig()
+	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
 
 	gin.SetMode(config.NewConfig().Server.GinMode)
 	engine := gin.Default()

@@ -41,6 +41,4 @@ ENV PASSWORD=admin
 ENV SOURCE_PATH=/downloads
 ENV MEDIA_PATH=/meido-anime
 
-VOLUME ["/var/db"]
-
 ENTRYPOINT ["/app"]

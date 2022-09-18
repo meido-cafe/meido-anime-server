@@ -119,8 +119,14 @@ func NewQbittorrentClient() repo.TorrentClientInterface {
 
 // Injectors from user.go:
 
+func NewUserService() *service.UserService {
+	userService := service.NewUserService()
+	return userService
+}
+
 func NewUserApi() *v1.UserApi {
-	userApi := v1.NewUserApi()
+	userService := NewUserService()
+	userApi := v1.NewUserApi(userService)
 	return userApi
 }
 
