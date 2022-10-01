@@ -22,7 +22,7 @@ func main() {
 	init := service.NewInitService()
 	init.Init()
 
-	if err := engine.Run(fmt.Sprintf("%s:%d", "localhost", config.Conf.Server.Port)); err != nil {
+	if err := engine.Run(fmt.Sprintf("%s:%d", "0.0.0.0", config.Conf.Server.Port)); err != nil {
 		log.Fatalln("启动失败:", err)
 	}
 }
