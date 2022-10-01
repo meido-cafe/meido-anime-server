@@ -26,6 +26,7 @@ jobs:
       - name: docker build image
         run: |
           docker build -t ${{ env.DOCKER_NAME }} .
+
       - name: docker save image
         run: docker save -o ${{ env.DOCKER_NAME }}.tar ${{ env.DOCKER_NAME }}
 

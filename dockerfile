@@ -27,9 +27,6 @@ RUN apk add tzdata && \
 COPY --from=builder /build/app /
 COPY sql/init.sql /sql/
 
-RUN mv /config/temp/${MODE}.yaml /config/config.yaml
-RUN rm -f /config/tmp/*
-
 # nas-anime的web端口
 
 ENV USERNAME=admin
