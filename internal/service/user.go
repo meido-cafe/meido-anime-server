@@ -12,14 +12,7 @@ import (
 	"time"
 )
 
-type UserService struct {
-}
-
-func NewUserService() *UserService {
-	return &UserService{}
-}
-
-func (this *UserService) Login(req vo.LoginRequest, user model.User) (token string, err error) {
+func (this *Service) Login(req vo.LoginRequest, user model.User) (token string, err error) {
 	md5Username := tool.MD5Salt(os.Getenv("USERNAME"), global.Salt, 1)
 	if req.Username != md5Username {
 		err = errors.New("用户名或密码错误")
@@ -44,6 +37,6 @@ func (this *UserService) Login(req vo.LoginRequest, user model.User) (token stri
 	return
 }
 
-func (this *UserService) Logout(token string) {
+func (this *Service) Logout(token string) {
 	delete(global.TokenCache, token)
 }

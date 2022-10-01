@@ -18,21 +18,21 @@ type QB struct {
 	Client *req.Client
 }
 
-func NewQB(conf *config.Config) *QB {
+func InitQB() {
 	qbOnce.Do(func() {
 		qb = new(QB)
 
 		qb.Client = req.C().
 			SetTimeout(5 * time.Second).
-			SetBaseURL(fmt.Sprintf("%s/api/v2", conf.QB.Url))
+			SetBaseURL(fmt.Sprintf("%s/api/v2", config.Conf.QB.Url))
 
-		//if conf.Env == "dev" || conf.Env == "local" {
+		//if config.Conf.Env == "dev" || config.Conf.Env == "local" {
 		//	qb.Client = qb.Client.DevMode()
 		//}
-		log.Printf("正在连接 qbittorrent: [url: %s] [username: %s] \n", conf.QB.Url, conf.QB.Username)
+		log.Printf("正在连接 qbittorrent: [url: %s] [username: %s] \n", config.Conf.QB.Url, config.Conf.QB.Username)
 		res, err := qb.Client.R().SetFormDataAnyType(map[string]interface{}{
-			"username": conf.QB.Username,
-			"password": conf.QB.Password,
+			"username": config.Conf.QB.Username,
+			"password": config.Conf.QB.Password,
 		}).Post("/auth/login")
 
 		if err != nil {
@@ -70,5 +70,8 @@ func NewQB(conf *config.Config) *QB {
 
 		log.Println("qbittorrent 连接成功")
 	})
+}
+func GetQB() *QB {
+	InitQB()
 	return qb
 }

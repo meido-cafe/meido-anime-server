@@ -5,18 +5,9 @@ import (
 	"log"
 	"meido-anime-server/internal/api/response"
 	"meido-anime-server/internal/model/vo"
-	"meido-anime-server/internal/service"
 )
 
-type RssApi struct {
-	service *service.RssService
-}
-
-func NewRssApi(service *service.RssService) *RssApi {
-	return &RssApi{service: service}
-}
-
-func (this *RssApi) GetMikanInfo(ctx *gin.Context) {
+func (this *Api) GetMikanInfo(ctx *gin.Context) {
 	req := vo.GetRssInfoMikanRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
 		log.Println(err)
@@ -38,7 +29,7 @@ func (this *RssApi) GetMikanInfo(ctx *gin.Context) {
 	response.Data(ctx, res)
 }
 
-func (this *RssApi) GetSearch(ctx *gin.Context) {
+func (this *Api) GetSearch(ctx *gin.Context) {
 	req := vo.GetRssSearchRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
 		log.Println(err)
@@ -60,7 +51,7 @@ func (this *RssApi) GetSearch(ctx *gin.Context) {
 	response.Data(ctx, res)
 }
 
-func (this *RssApi) GetSubject(ctx *gin.Context) {
+func (this *Api) GetRssSubject(ctx *gin.Context) {
 	req := vo.GetRssSubjectRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
 		log.Println(err)
@@ -77,7 +68,7 @@ func (this *RssApi) GetSubject(ctx *gin.Context) {
 		return
 	}
 
-	res, err := this.service.GetSubject(req)
+	res, err := this.service.GetRssSubject(req)
 	if err != nil {
 		response.Error(ctx, "获取rss信息失败")
 		return

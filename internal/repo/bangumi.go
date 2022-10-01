@@ -3,6 +3,7 @@ package repo
 import (
 	"github.com/imroc/req/v3"
 	"log"
+	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/model"
 	"strconv"
 )
@@ -11,8 +12,8 @@ type BangumiRepo struct {
 	client *req.Client
 }
 
-func NewBangumiRepo(client *req.Client) *BangumiRepo {
-	return &BangumiRepo{client: client}
+func NewBangumiRepo() *BangumiRepo {
+	return &BangumiRepo{client: common.GetBangumiClient()}
 }
 
 func (this *BangumiRepo) GetCalendar() (ret []model.BangumiCalendar, err error) {

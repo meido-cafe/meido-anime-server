@@ -12,8 +12,8 @@ type Qbittorrent struct {
 	qb *common.QB
 }
 
-func NewQbittorrent(qb *common.QB) TorrentClientInterface {
-	return &Qbittorrent{qb: qb}
+func NewQbittorrent() *Qbittorrent {
+	return &Qbittorrent{qb: common.GetQB()}
 }
 
 func (q Qbittorrent) DeleteTorrent(ctx context.Context, hashes []string, deleteFile bool) (err error) {
@@ -108,6 +108,24 @@ func (q Qbittorrent) GetLog(ctx context.Context) (res []map[string]any, err erro
 	}
 
 	if err = ret.Unmarshal(&res); err != nil {
+		log.Println(err)
+		return
+	}
+	return
+}
+
+func (q Qbittorrent) AddTorrents(ctx context.Context, torrentList []string, categoryName string, savePath string) (err error) {
+	ret, err := q.qb.Client.R().SetFormDataAnyType(map[string]interface{}{
+		"urls":     torrentList,
+		"category": categoryName,
+		"savepath": savePath,
+	}).Post("/torrents/add")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	if ret.IsError() {
+		err = fmt.Errorf("%s", ret.String())
 		log.Println(err)
 		return
 	}

@@ -4,26 +4,13 @@ import (
 	"context"
 	"errors"
 	"log"
-	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
 	"meido-anime-server/internal/tool"
 	"os"
 )
 
-type VideoSqliteRepo struct {
-	db  common.DBClient
-	sql *tool.Sql
-}
-
-func NewVideoRepo(db common.DBClient, sql *tool.Sql) VideoInterface {
-	return &VideoSqliteRepo{
-		db:  db,
-		sql: sql,
-	}
-}
-
-func (this *VideoSqliteRepo) CategoryInsertOne(ctx context.Context, cagetory model.Cagetory) (err error) {
+func (this *Repo) CategoryInsertOne(ctx context.Context, cagetory model.Cagetory) (err error) {
 	sqlRet, err := this.sql.FormatInsert("category", map[string]any{
 		"name":        cagetory.Name,
 		"origin":      2,
@@ -42,7 +29,7 @@ func (this *VideoSqliteRepo) CategoryInsertOne(ctx context.Context, cagetory mod
 	return
 }
 
-func (this *VideoSqliteRepo) CategorySelectOne(ctx context.Context, id int64) (ret model.Cagetory, err error) {
+func (this *Repo) CategorySelectOne(ctx context.Context, id int64) (ret model.Cagetory, err error) {
 	sql := `select id,name,origin,create_time,update_time from category where id = ? `
 	rows, err := this.db.Queryx(sql, id)
 	if err != nil {
@@ -60,7 +47,7 @@ func (this *VideoSqliteRepo) CategorySelectOne(ctx context.Context, id int64) (r
 	return
 }
 
-func (this *VideoSqliteRepo) CategorySelectList(ctx context.Context) (ret []model.Cagetory, err error) {
+func (this *Repo) CategorySelectList(ctx context.Context) (ret []model.Cagetory, err error) {
 	sql := `select id,name,origin,create_time,update_time from category`
 	if err = this.db.Select(&ret, sql); err != nil {
 		log.Println(err)
@@ -69,7 +56,7 @@ func (this *VideoSqliteRepo) CategorySelectList(ctx context.Context) (ret []mode
 	return
 }
 
-func (this *VideoSqliteRepo) CategoryDeleteOne(ctx context.Context, id int64) (err error) {
+func (this *Repo) CategoryDeleteOne(ctx context.Context, id int64) (err error) {
 	sql := `delete from category where id = ? and origin = 2 `
 	if _, err = this.db.Exec(sql, id); err != nil {
 		log.Println(err)
@@ -78,7 +65,7 @@ func (this *VideoSqliteRepo) CategoryDeleteOne(ctx context.Context, id int64) (e
 	return
 }
 
-func (this *VideoSqliteRepo) CategoryUpdateName(ctx context.Context, id int64, name string) (err error) {
+func (this *Repo) CategoryUpdateName(ctx context.Context, id int64, name string) (err error) {
 	sql := ` update category set name = ? where id = ? and origin = 2 `
 	if _, err = this.db.Exec(sql, name, id); err != nil {
 		log.Println(err)
@@ -87,7 +74,7 @@ func (this *VideoSqliteRepo) CategoryUpdateName(ctx context.Context, id int64, n
 	return
 }
 
-func (this *VideoSqliteRepo) VideoSelectOne(ctx context.Context, id int64, bangumiId int64) (res model.Video, err error) {
+func (this *Repo) VideoSelectOne(ctx context.Context, id int64, bangumiId int64, title string) (res model.Video, err error) {
 	if id <= 0 && bangumiId <= 0 {
 		err = errors.New("参数错误")
 		log.Println(err)
@@ -122,6 +109,10 @@ where true
 		sql += ` and bangumi_id = ? `
 		q.Add(bangumiId)
 	}
+	if title != "" {
+		sql += ` and title = ? `
+		q.Add(title)
+	}
 
 	rowx, err := this.db.Queryx(sql, q.Values()...)
 	if err != nil {
@@ -139,7 +130,7 @@ where true
 	return
 }
 
-func (this *VideoSqliteRepo) VideoInsertOne(ctx context.Context, video model.Video) (err error) {
+func (this *Repo) VideoInsertOne(ctx context.Context, video model.Video) (err error) {
 	// DB
 	ret, err := this.sql.FormatInsert("video", map[string]any{
 		"bangumi_id":  video.BangumiId,
@@ -169,7 +160,7 @@ func (this *VideoSqliteRepo) VideoInsertOne(ctx context.Context, video model.Vid
 	return
 }
 
-func (this *VideoSqliteRepo) VideoSelectList(ctx context.Context, request vo.VideoGetListRequest) (res []model.Video, total int64, err error) {
+func (this *Repo) VideoSelectList(ctx context.Context, request vo.VideoGetListRequest) (res []model.Video, total int64, err error) {
 	q := tool.NewQuery()
 	querySQL := `
 select 
@@ -216,7 +207,7 @@ where true
 		q.Add(request.AddEndTime)
 	}
 	if request.Title != "" {
-		querySQL += ` and title like '%?%'`
+		querySQL += ` and title like '%'||?||'%'`
 		q.Add(request.Title)
 	}
 
@@ -248,7 +239,7 @@ where true
 	return
 }
 
-func (this *VideoSqliteRepo) VideoDeleteList(ctx context.Context, idList []int64) (err error) {
+func (this *Repo) VideoDeleteList(ctx context.Context, idList []int64) (err error) {
 	q := tool.NewQuery()
 	q.Add(idList)
 	sql := ` delete from video where id in ` + this.sql.FormatList(len(idList))
@@ -259,7 +250,7 @@ func (this *VideoSqliteRepo) VideoDeleteList(ctx context.Context, idList []int64
 	return
 }
 
-func (this *VideoSqliteRepo) VideoItemInsertList(ctx context.Context, videoItemList []model.VideoItem) (cnt int64, err error) {
+func (this *Repo) VideoItemInsertList(ctx context.Context, videoItemList []model.VideoItem) (cnt int64, err error) {
 	sql := ` insert into video_item (pid,episode,source_path,link_path,create_time,update_time) values (?,?,?,?,?,?)`
 
 	stmt, err := this.db.Prepare(sql)
@@ -286,7 +277,7 @@ func (this *VideoSqliteRepo) VideoItemInsertList(ctx context.Context, videoItemL
 
 	return
 }
-func (this *VideoSqliteRepo) VideoItemSelectList(ctx context.Context, pid []int64) (res []model.VideoItem, total int64, err error) {
+func (this *Repo) VideoItemSelectList(ctx context.Context, pid []int64) (res []model.VideoItem, total int64, err error) {
 	q := tool.NewQuery()
 	sql := `
 select 
@@ -315,7 +306,7 @@ where true
 	return
 }
 
-func (this *VideoSqliteRepo) VideoItemDeleteList(ctx context.Context, idList []int64) (err error) {
+func (this *Repo) VideoItemDeleteList(ctx context.Context, idList []int64) (err error) {
 	sql := `
 delete from video_item
 where id in ` + this.sql.FormatList(len(idList))
@@ -331,7 +322,7 @@ where id in ` + this.sql.FormatList(len(idList))
 	return
 }
 
-func (this *VideoSqliteRepo) VideoItemUpdateLinkPathList(ctx context.Context, videoItemList []model.VideoItem) (err error) {
+func (this *Repo) VideoItemUpdateLinkPathList(ctx context.Context, videoItemList []model.VideoItem) (err error) {
 	sql := ` update video_item set link_path = ? where id = ? `
 	stmt, err := this.db.Prepare(sql)
 	if err != nil {
@@ -349,7 +340,7 @@ func (this *VideoSqliteRepo) VideoItemUpdateLinkPathList(ctx context.Context, vi
 	return
 }
 
-func (this *VideoSqliteRepo) VideoItemDeleteListByPid(ctx context.Context, pid []int64) (err error) {
+func (this *Repo) VideoItemDeleteListByPid(ctx context.Context, pid []int64) (err error) {
 	q := tool.NewQuery()
 	sql := `delete from video_item where pid in ` + this.sql.FormatList(len(pid))
 	q.Add(pid)
@@ -360,7 +351,7 @@ func (this *VideoSqliteRepo) VideoItemDeleteListByPid(ctx context.Context, pid [
 	return
 }
 
-func (this *VideoSqliteRepo) VideoUpdateCategoryList(ctx context.Context, videoList []model.Video) (err error) {
+func (this *Repo) VideoUpdateCategoryList(ctx context.Context, videoList []model.Video) (err error) {
 	sql := ` update video set category = ?, link_dir = ? where id = ? `
 	stmt, err := this.db.Prepare(sql)
 	if err != nil {
@@ -378,7 +369,7 @@ func (this *VideoSqliteRepo) VideoUpdateCategoryList(ctx context.Context, videoL
 	return
 }
 
-func (this *VideoSqliteRepo) CategorySelectOneByName(ctx context.Context, name string) (ret model.Cagetory, err error) {
+func (this *Repo) CategorySelectOneByName(ctx context.Context, name string) (ret model.Cagetory, err error) {
 	sql := ` select id,name,origin,create_time,update_time from category where name = ? `
 	rows, err := this.db.Queryx(sql, name)
 	if err != nil {
@@ -396,7 +387,7 @@ func (this *VideoSqliteRepo) CategorySelectOneByName(ctx context.Context, name s
 	return
 }
 
-func (this *VideoSqliteRepo) VideoSelectListById(ctx context.Context, idList []int64) (ret []model.Video, err error) {
+func (this *Repo) VideoSelectListById(ctx context.Context, idList []int64) (ret []model.Video, err error) {
 	sql := `
 select 
 id,
@@ -434,6 +425,42 @@ where id in
 			return
 		}
 		ret = append(ret, v)
+	}
+	return
+}
+
+func (this *Repo) VideoSelectOneByTitle(ctx context.Context, title string) (ret model.Video, err error) {
+	sql := `select 
+id,
+bangumi_id,
+origin,
+category,
+title,
+season,
+cover,
+total,
+rss_url,
+rule_name,
+play_time,
+source_dir,
+link_dir,
+create_time,
+update_time
+from video
+where title = ?
+`
+	queryx, err := this.db.Queryx(sql, title)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer queryx.Close()
+
+	if queryx.Next() {
+		if err = queryx.StructScan(&ret); err != nil {
+			log.Println(err)
+			return
+		}
 	}
 	return
 }

@@ -10,14 +10,7 @@ import (
 	"strings"
 )
 
-type RssService struct {
-}
-
-func NewRssService() *RssService {
-	return &RssService{}
-}
-
-func (this *RssService) GetInfoMikan(request vo.GetRssInfoMikanRequest) (response vo.GetRssMiaknInfoResponse, err error) {
+func (this *Service) GetInfoMikan(request vo.GetRssInfoMikanRequest) (response vo.GetRssMiaknInfoResponse, err error) {
 	c := colly.NewCollector(colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"), colly.MaxDepth(1))
 
 	// 获取番剧ID
@@ -53,7 +46,7 @@ func (this *RssService) GetInfoMikan(request vo.GetRssInfoMikanRequest) (respons
 	return
 }
 
-func (this *RssService) GetSearch(request vo.GetRssSearchRequest) (response vo.GetRssSearchResponse, err error) {
+func (this *Service) GetSearch(request vo.GetRssSearchRequest) (response vo.GetRssSearchResponse, err error) {
 	response.Url = "https://mikanani.me/RSS/Search?searchstr=" + url.QueryEscape(request.SubjectName)
 	response.Feed, err = tool.ParseRss(response.Url)
 	if err != nil {
@@ -64,7 +57,8 @@ func (this *RssService) GetSearch(request vo.GetRssSearchRequest) (response vo.G
 	return
 }
 
-func (this *RssService) GetSubject(request vo.GetRssSubjectRequest) (response vo.GetRssSubjectResponse, err error) {
+// GetRssSubject 根据bangumiID与mikan字幕组ID获取Rss
+func (this *Service) GetRssSubject(request vo.GetRssSubjectRequest) (response vo.GetRssSubjectResponse, err error) {
 	response.Url = "https://mikanani.me/RSS/Bangumi?bangumiId=" + strconv.Itoa(int(request.MikanId)) + "&subgroupid=" + strconv.Itoa(int(request.MikanGroupId))
 	response.Feed, err = tool.ParseRss(response.Url)
 	if err != nil {

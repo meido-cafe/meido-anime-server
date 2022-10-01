@@ -9,11 +9,14 @@ import (
 var bangumiClient *req.Client
 var bangumiClientOnce sync.Once
 
-func NewBangumiClient() *req.Client {
+func InitBangumiClient() {
 	bangumiClientOnce.Do(func() {
 		bangumiClient = req.C().
 			SetTimeout(5 * time.Second).
 			SetBaseURL("https://api.bgm.tv")
 	})
+}
+func GetBangumiClient() *req.Client {
+	InitBangumiClient()
 	return bangumiClient
 }

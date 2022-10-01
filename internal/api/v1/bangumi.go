@@ -4,18 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"meido-anime-server/internal/api/response"
 	"meido-anime-server/internal/model/vo"
-	"meido-anime-server/internal/service"
 )
 
-type BangumiApi struct {
-	service *service.BangumiService
-}
-
-func NewBangumiApi(service *service.BangumiService) *BangumiApi {
-	return &BangumiApi{service: service}
-}
-
-func (this *BangumiApi) GetCalendar(ctx *gin.Context) {
+func (this *Api) GetCalendar(ctx *gin.Context) {
 	calendarList, total, err := this.service.GetCalendar()
 	if err != nil {
 		response.Error(ctx, "获取失败")
@@ -24,7 +15,7 @@ func (this *BangumiApi) GetCalendar(ctx *gin.Context) {
 	response.List(ctx, calendarList, total)
 }
 
-func (this *BangumiApi) GetSubject(ctx *gin.Context) {
+func (this *Api) GetSubject(ctx *gin.Context) {
 	req := vo.GetSubjectRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
 		response.BadBind(ctx)
@@ -44,7 +35,7 @@ func (this *BangumiApi) GetSubject(ctx *gin.Context) {
 	response.Data(ctx, subject)
 }
 
-func (this *BangumiApi) Search(ctx *gin.Context) {
+func (this *Api) Search(ctx *gin.Context) {
 	req := vo.SearchRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
 		response.BadBind(ctx)

@@ -3,19 +3,19 @@ package service
 import "log"
 
 type InitService struct {
-	CronService  *CronService
-	videoService *VideoService
+	CronService *CronService
+	service     *Service
 }
 
-func NewInitService(videoService *VideoService, cronService *CronService) *InitService {
+func NewInitService() *InitService {
 	return &InitService{
-		videoService: videoService,
-		CronService:  cronService,
+		service:     NewService(),
+		CronService: NewCronService(),
 	}
 }
 
 func (this *InitService) Init() {
-	if err := this.videoService.CacheLinkPath(); err != nil {
+	if err := this.service.CacheLinkPath(); err != nil {
 		log.Println("缓存硬链接资源路径失败:", err)
 	}
 

@@ -5,18 +5,9 @@ import (
 	"meido-anime-server/internal/api/response"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
-	"meido-anime-server/internal/service"
 )
 
-type UserApi struct {
-	service *service.UserService
-}
-
-func NewUserApi(userService *service.UserService) *UserApi {
-	return &UserApi{service: userService}
-}
-
-func (this *UserApi) Login(ctx *gin.Context) {
+func (this *Api) Login(ctx *gin.Context) {
 	req := vo.LoginRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {
 		response.BadBind(ctx)
@@ -42,7 +33,7 @@ func (this *UserApi) Login(ctx *gin.Context) {
 	})
 }
 
-func (this *UserApi) Logout(ctx *gin.Context) {
+func (this *Api) Logout(ctx *gin.Context) {
 	this.service.Logout(ctx.GetHeader("token"))
 	response.Success(ctx)
 }

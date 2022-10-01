@@ -12,8 +12,8 @@ type Middleware struct {
 	conf *config.Config
 }
 
-func NewMiddleware(conf *config.Config) *Middleware {
-	return &Middleware{conf: conf}
+func NewMiddleware() *Middleware {
+	return &Middleware{conf: config.GetConfig()}
 }
 
 func (this *Middleware) Auth() gin.HandlerFunc {

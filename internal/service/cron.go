@@ -13,14 +13,14 @@ import (
 )
 
 type CronService struct {
-	cron         *cron.Cron
-	videoService *VideoService
+	cron    *cron.Cron
+	service *Service
 }
 
-func NewCronService(videoService *VideoService) *CronService {
+func NewCronService() *CronService {
 	return &CronService{
-		cron:         cron.New(),
-		videoService: videoService,
+		cron:    cron.New(),
+		service: NewService(),
 	}
 }
 
@@ -62,14 +62,14 @@ func (this *CronService) register(list ...cronFunc) (err error) {
 
 func (this *CronService) handleVideoLink() producer {
 	return producer{"0 */10 * * * ?", func() {
-		this.videoService.Link()
+		this.service.Link()
 	}}
 }
 
 // 清理媒体文件夹下的空文件夹
 func (this *CronService) handleClearDir() producer {
 	return producer{"0 */10 * * * ?", func() {
-		list, err := this.videoService.GetCategoryList()
+		list, err := this.service.GetCategoryList()
 		if err != nil {
 			log.Println("[定时清理媒体库空目录失败] [获取分类列表错误]:", err)
 			return

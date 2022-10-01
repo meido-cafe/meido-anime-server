@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"meido-anime-server/config"
-	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/global"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
@@ -20,57 +18,18 @@ import (
 	"time"
 )
 
-type VideoService struct {
-	repo          repo.VideoInterface
-	torrentClient repo.TorrentClientInterface
-}
-
-func NewVideoService(repo repo.VideoInterface, torrentClient repo.TorrentClientInterface) *VideoService {
-	return &VideoService{
-		repo:          repo,
-		torrentClient: torrentClient,
-	}
-}
-
-type transactionResult struct {
-	Error   error
-	TxError error
-}
-
-func (this *VideoService) transaction(ctx context.Context, fn func(repo repo.VideoInterface) error) (ret transactionResult) {
-	conf := config.NewConfig()
-	db := common.NewDB(conf)
-	tx, err := db.BeginTxx(ctx, nil)
-	if err != nil {
-		ret.TxError = err
-		return
-	}
-	defer func() {
-		if ret.TxError == nil && ret.Error != nil {
-			ret.TxError = tx.Rollback()
-		}
-	}()
-	re := repo.NewVideoRepo(tx, tool.NewSql())
-
-	if funcErr := fn(re); funcErr != nil {
-		ret.Error = err
-		return
-	}
-
-	ret.TxError = tx.Commit()
-	return
-}
-
-func (this *VideoService) getCategoryDir(categoryName string) string {
+// 获取分类的目录路径
+func (this *Service) getCategoryDir(categoryName string) string {
 	return filepath.Join(global.MediaPath, categoryName)
 }
 
-func (this *VideoService) getLinkDir(categoryName string, title string, season int64) string {
+// 获取番剧硬链接路径
+func (this *Service) getLinkDir(categoryName string, title string, season int64) string {
 	return filepath.Join(global.MediaPath, categoryName, title, fmt.Sprintf("S%02d", season))
 }
 
 // CacheLinkPath 缓存已经硬链接的路径
-func (this *VideoService) CacheLinkPath() (err error) {
+func (this *Service) CacheLinkPath() (err error) {
 	list, _, err := this.repo.VideoItemSelectList(context.TODO(), nil)
 	if err != nil {
 		log.Println(err)
@@ -84,8 +43,8 @@ func (this *VideoService) CacheLinkPath() (err error) {
 }
 
 // GetOne 根据ID或bangumi id 获取一个番剧的信息
-func (this *VideoService) GetOne(request vo.VideoGetOneRequest) (ret model.Video, err error) {
-	ret, err = this.repo.VideoSelectOne(context.TODO(), request.Id, request.BangumiId)
+func (this *Service) GetOne(request vo.VideoGetOneRequest) (ret model.Video, err error) {
+	ret, err = this.repo.VideoSelectOne(context.TODO(), request.Id, request.BangumiId, request.Title)
 	if err != nil {
 		log.Println("获取番剧信息失败")
 		return
@@ -95,8 +54,9 @@ func (this *VideoService) GetOne(request vo.VideoGetOneRequest) (ret model.Video
 
 // Subscribe 订阅RSS
 //
-// tx: 插入数据库, 订阅rss
-func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error) {
+//	只支持订阅, 手动添加种子需要使用添加种子接口
+//	tx: 插入数据库, 订阅rss
+func (this *Service) Subscribe(request vo.VideoSubscribeRequest) (err error) {
 	// 如果参数没有传第几季, 则从标题正则获取, 获取不到视为第一季
 	var season int64
 	var matchStr string
@@ -181,14 +141,14 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 	}
 
 	ctx := context.TODO()
-	ret := this.transaction(ctx, func(repo repo.VideoInterface) error {
+	ret := this.transaction(ctx, func(repo *repo.Repo) error {
 		if err := repo.VideoInsertOne(ctx, data); err != nil {
 			return err
 		}
-		if err := this.torrentClient.AddRss(ctx, request.RssUrl, ruleName); err != nil {
+		if err := this.qb.AddRss(ctx, request.RssUrl, ruleName); err != nil {
 			return err
 		}
-		if err := this.torrentClient.SetRule(ctx, setRule); err != nil {
+		if err := this.qb.SetRule(ctx, setRule); err != nil {
 			return err
 		}
 		return nil
@@ -208,8 +168,123 @@ func (this *VideoService) Subscribe(request vo.VideoSubscribeRequest) (err error
 	return
 }
 
+// Add 手动添加番剧
+//
+//	mode == 1: 订阅rss, mode==2: 添加种子方式
+//	tx: 插入数据库, 判断mode 执行订阅rss或添加种子
+func (this *Service) Add(request vo.VideoAdd) (err error) {
+	var season int64
+	var matchStr string
+
+	if request.Season > 0 {
+		season = request.Season
+	} else {
+		season, matchStr, err = tool.GetSeason(request.Title)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if matchStr == "" {
+			season = 1
+			log.Println("没有从", request.Title, "中获取季相关信息,已设置为默认的第一季")
+		} else {
+			old := request.Title
+			request.Title = strings.ReplaceAll(request.Title, matchStr, "")
+			request.Title = strings.TrimSpace(request.Title)
+			log.Println(old, " 重命名为 ==> ", request.Title)
+		}
+	}
+	// 获取分类信息
+	category, err := this.repo.CategorySelectOne(context.TODO(), request.Category)
+	if err != nil {
+		log.Println("获取分类信息失败")
+		return err
+	}
+
+	downloadPath := fmt.Sprintf("%s/%s/S%02d", strings.TrimRight(global.QBDownloadPath, "/"), request.Title, season)
+	sourcePath := filepath.Join(global.SourcePath, request.Title, fmt.Sprintf("S%02d", season))
+	linkDir := this.getLinkDir(category.Name, request.Title, season)
+	ruleName := fmt.Sprintf("%s - S%02d", request.Title, season)
+
+	// QB参数
+	qbRule := model.QBDef{
+		Enabled:                   true,
+		MustContain:               request.MustContain,
+		MustNotContain:            request.MustNotContain,
+		UseRegex:                  request.UseRegex,
+		EpisodeFilter:             request.EpisodeFilter,
+		SmartFilter:               request.SmartFilter,
+		PreviouslyMatchedEpisodes: nil,
+		AffectedFeeds:             []string{request.RssUrl},
+		IgnoreDays:                0,
+		LastMatch:                 "",
+		AddPaused:                 false,
+		AssignedCategory:          global.QBCategory,
+		SavePath:                  downloadPath,
+	}
+
+	marshal, err := json.Marshal(qbRule)
+	if err != nil {
+		log.Printf("[%s]解析失败:%v", request.Title, err)
+		return err
+	}
+
+	setRule := map[string]string{
+		"ruleName": ruleName,
+		"ruleDef":  string(marshal),
+	}
+
+	videoInsertData := model.Video{
+		BangumiId: request.BangumiId,
+		Origin:    2,
+		Category:  request.Category,
+		Title:     request.Title,
+		Season:    request.Season,
+		Cover:     request.Cover,
+		Total:     request.Total,
+		RssUrl:    request.RssUrl,
+		RuleName:  ruleName,
+		PlayTime:  request.PlayTime,
+		SourceDir: sourcePath,
+		LinkDir:   linkDir,
+		Time:      model.NewTime(),
+	}
+	ctx := context.TODO()
+	ret := this.transaction(ctx, func(repo *repo.Repo) error {
+		if err := repo.VideoInsertOne(ctx, videoInsertData); err != nil {
+			return err
+		}
+
+		if request.Mode == 1 {
+			if err := this.qb.AddRss(ctx, request.RssUrl, ruleName); err != nil {
+				return err
+			}
+			if err := this.qb.SetRule(ctx, setRule); err != nil {
+				return err
+			}
+			return nil
+		}
+
+		if err := this.qb.AddTorrents(ctx, request.TorrentList, category.Name, downloadPath); err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if ret.Error != nil {
+		log.Printf(`[%s][第%d季] 添加番剧失败 [error] %v \n`, request.Title, request.Season, ret.Error)
+		return ret.Error
+	}
+	if ret.TxError != nil {
+		log.Printf(`[%s][第%d季] 添加番剧失败 [error] %v \n`, request.Title, request.Season, ret.TxError)
+		return ret.TxError
+	}
+
+	return
+}
+
 // GetList 获取番剧列表
-func (this *VideoService) GetList(request vo.VideoGetListRequest) (response vo.VideoGetListResponse, err error) {
+func (this *Service) GetList(request vo.VideoGetListRequest) (response vo.VideoGetListResponse, err error) {
 	list, total, err := this.repo.VideoSelectList(context.TODO(), request)
 	if err != nil {
 		log.Println(err)
@@ -221,11 +296,11 @@ func (this *VideoService) GetList(request vo.VideoGetListRequest) (response vo.V
 }
 
 // DeleteVideo 删除番剧
-func (this *VideoService) DeleteVideo(request vo.DeleteVideoRequest) (err error) {
+func (this *Service) DeleteVideo(request vo.DeleteVideoRequest) (err error) {
 
-	ret := this.transaction(context.TODO(), func(repo repo.VideoInterface) error {
+	ret := this.transaction(context.TODO(), func(repo *repo.Repo) error {
 		// 获取番剧信息
-		video, err := repo.VideoSelectOne(context.TODO(), request.Id, 0)
+		video, err := repo.VideoSelectOne(context.TODO(), request.Id, 0, "")
 		if err != nil {
 			return errors.New("获取")
 		}
@@ -264,11 +339,11 @@ func (this *VideoService) DeleteVideo(request vo.DeleteVideoRequest) (err error)
 			return nil
 		}
 		// 删除下载规则
-		if err := this.torrentClient.DeleteRule(context.TODO(), video.RuleName); err != nil {
+		if err := this.qb.DeleteRule(context.TODO(), video.RuleName); err != nil {
 			return err
 		}
 		// 删除rss
-		if err := this.torrentClient.DeleteRss(context.TODO(), video.RuleName); err != nil {
+		if err := this.qb.DeleteRss(context.TODO(), video.RuleName); err != nil {
 			return err
 		}
 		return nil
@@ -287,7 +362,7 @@ func (this *VideoService) DeleteVideo(request vo.DeleteVideoRequest) (err error)
 }
 
 // Link 执行硬链接
-func (this *VideoService) Link() error {
+func (this *Service) Link() error {
 	// 获取番剧列表
 	list, total, err := this.repo.VideoSelectList(context.TODO(), vo.VideoGetListRequest{})
 	if err != nil {
@@ -407,9 +482,9 @@ func (this *VideoService) Link() error {
 	return nil
 }
 
-func (this *VideoService) CreateCategory(request vo.CreateCategoryRequest) (err error) {
+func (this *Service) CreateCategory(request vo.CreateCategoryRequest) (err error) {
 	ctx := context.TODO()
-	ret := this.transaction(ctx, func(repo repo.VideoInterface) error {
+	ret := this.transaction(ctx, func(repo *repo.Repo) error {
 		if err := repo.CategoryInsertOne(context.TODO(), model.Cagetory{
 			Name:   request.Name,
 			Origin: 2,
@@ -436,27 +511,27 @@ func (this *VideoService) CreateCategory(request vo.CreateCategoryRequest) (err 
 	return
 }
 
-func (this *VideoService) GetCategoryList() (res []model.Cagetory, err error) {
+func (this *Service) GetCategoryList() (res []model.Cagetory, err error) {
 	return this.repo.CategorySelectList(context.TODO())
 }
 
-func (this *VideoService) GetCategory(id int64) (res model.Cagetory, err error) {
+func (this *Service) GetCategory(id int64) (res model.Cagetory, err error) {
 	return this.repo.CategorySelectOne(context.TODO(), id)
 }
 
-func (this *VideoService) GetCategoryByName(name string) (res model.Cagetory, err error) {
+func (this *Service) GetCategoryByName(name string) (res model.Cagetory, err error) {
 	return this.repo.CategorySelectOneByName(context.TODO(), name)
 }
 
 // DeleteCategory 删除分类
 //
 //	对应的分类移动到未知分类中
-func (this *VideoService) DeleteCategory(id int64) (err error) {
+func (this *Service) DeleteCategory(id int64) (err error) {
 	defer func() {
 		go this.Link()
 	}()
 
-	ret := this.transaction(context.TODO(), func(repo repo.VideoInterface) error {
+	ret := this.transaction(context.TODO(), func(repo *repo.Repo) error {
 		// 获取分类信息
 		category, err := repo.CategorySelectOne(context.TODO(), id)
 		if err != nil {
@@ -541,12 +616,12 @@ func (this *VideoService) DeleteCategory(id int64) (err error) {
 }
 
 // UpdateCategoryName 更新分类的名称
-func (this *VideoService) UpdateCategoryName(request vo.UpdateCategoryNameRequest) (err error) {
+func (this *Service) UpdateCategoryName(request vo.UpdateCategoryNameRequest) (err error) {
 	defer func() {
 		go this.Link()
 	}()
 
-	ret := this.transaction(context.TODO(), func(repo repo.VideoInterface) error {
+	ret := this.transaction(context.TODO(), func(repo *repo.Repo) error {
 		// 检查分类是否存在
 		find, err := repo.CategorySelectOneByName(context.TODO(), request.Name)
 		if err != nil {
@@ -638,13 +713,13 @@ func (this *VideoService) UpdateCategoryName(request vo.UpdateCategoryNameReques
 // UpdateVideoCategory 更新番剧的分类
 // /Media/A/title/s01/*  /Media/A/title/s01 remove
 //	/Media/B/title/s01/*
-func (this *VideoService) UpdateVideoCategory(request vo.UpdateVideoCategoryRequest) (err error) {
+func (this *Service) UpdateVideoCategory(request vo.UpdateVideoCategoryRequest) (err error) {
 	defer func() {
 		go this.Link()
 	}()
 
 	ctx := context.TODO()
-	ret := this.transaction(ctx, func(repo repo.VideoInterface) error {
+	ret := this.transaction(ctx, func(repo *repo.Repo) error {
 		// 获取新分类
 		category, err := repo.CategorySelectOne(ctx, request.Category)
 		if err != nil {

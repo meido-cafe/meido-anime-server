@@ -1,8 +1,0 @@
-server:
-  port: 8081
-  gin_mode: release # debug,release,test
-  token_expiration_time: 259200 # token过期时间 单位秒
-
-database:
-  path: ./meido-anime.db
-  max_cons: 10

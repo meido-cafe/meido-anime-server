@@ -16,15 +16,15 @@ import (
 var dbOnce sync.Once
 var db *sqlx.DB
 
-func NewDB(conf *config.Config) *sqlx.DB {
+func InitSqlite() {
 	dbOnce.Do(func() {
 		var err error
 
-		db, err = sqlx.Open("sqlite3", conf.Db.Path)
+		db, err = sqlx.Open("sqlite3", config.Conf.Db.Path)
 		if err != nil {
 			log.Fatalln("连接数据库失败:", err)
 		}
-		db.SetMaxOpenConns(conf.Db.MaxCons)
+		db.SetMaxOpenConns(config.Conf.Db.MaxCons)
 
 		log.Println("正在初始化数据库")
 		byt, err := ioutil.ReadFile("./sql/init.sql")
@@ -54,10 +54,10 @@ func NewDB(conf *config.Config) *sqlx.DB {
 
 		log.Println("数据库初始化成功")
 	})
-	return db
 }
 
-func NewDBClient(db *sqlx.DB) DBClient {
+func GetSqlite() *sqlx.DB {
+	InitSqlite()
 	return db
 }
 

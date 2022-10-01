@@ -16,6 +16,8 @@ RUN go build -ldflags="-s -w" -trimpath -o app .
 
 FROM alpine
 
+ARG MODE=dev
+
 # 时区
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN apk add tzdata && \
@@ -24,21 +26,27 @@ RUN apk add tzdata && \
 
 COPY --from=builder /build/app /
 COPY sql/init.sql /sql/
-COPY config/common.yaml /config/
-COPY config/dev.yaml /config/
-COPY config/pro.yaml /config/
 
+RUN mv /config/temp/${MODE}.yaml /config/config.yaml
+RUN rm -f /config/tmp/*
 
 # nas-anime的web端口
-ENV QB_WEB_URL=http://localhost:8081
+
+ENV USERNAME=admin
+ENV PASSWORD=admin
+ENV MEDIA_PATH=/meido-anime
+ENV SOURCE_PATH=/downloads
+
+ENV SERVER_PORT=8081
+ENV SERVER_TOKEN_EXPIRED_TIME=259200
+
+ENV DB_PATH=./db/meido-anime.db
+ENV DB_MAX_CONS=10
+
+ENV QB_WEB_URL=http://localhost:9999
 ENV QB_USERNAME=admin
 ENV QB_PASSWORD=adminadmin
 ENV QB_CATEGORY=meido-anime
-ENV QB_DOWNLOAD=/downloads
-
-ENV USERNME=admin
-ENV PASSWORD=admin
-ENV SOURCE_PATH=/downloads
-ENV MEDIA_PATH=/meido-anime
+ENV QB_DOWNLOAD_PATH=/downloads
 
 ENTRYPOINT ["/app"]

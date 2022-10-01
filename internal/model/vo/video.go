@@ -19,8 +19,9 @@ type VideoGetListResponse struct {
 }
 
 type VideoGetOneRequest struct {
-	Id        int64 `form:"id" json:"id"`
-	BangumiId int64 `form:"bangumi_id" json:"bangumi_id"`
+	Id        int64  `form:"id" json:"id"`
+	BangumiId int64  `form:"bangumi_id" json:"bangumi_id"`
+	Title     string `form:"title" json:"title"`
 }
 
 type VideoGetOneResponse struct {
@@ -43,16 +44,10 @@ type VideoSubscribeRequest struct {
 	SmartFilter    bool   `form:"smart_filter" json:"smart_filter"`         // 是否开启智能剧集过滤
 }
 
-type VideoAddTorrent struct {
-	BangumiId int64  `form:"bangumi_id" json:"bangumi_id"` // bangumi的ID
-	Title     string `form:"title" json:"title"`           // 标题
-	Category  int64  `form:"category" json:"category"`     // 类别 1:tv 2:剧场版 3:OVA
-	Season    int64  `form:"season" json:"season"`         // 第几季
-	Cover     string `form:"cover" json:"cover"`           // 封面图
-	Total     int64  `form:"total" json:"total"`           // 总集数
-	PlayTime  int64  `form:"play_time" json:"play_time"`   // 放送时间
-
-	TorrentList []string `json:"torrent_list"` // 种子列表
+type VideoAdd struct {
+	VideoSubscribeRequest
+	Mode        int      `json:"mode" form:"mode"`         // 订阅:1 种子:2
+	TorrentList []string `json:"torrent_list" form:"mode"` // 种子列表
 }
 
 type DeleteVideoRequest struct {

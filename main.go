@@ -5,20 +5,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"meido-anime-server/config"
-	"meido-anime-server/factory"
 	"meido-anime-server/internal/api"
+	"meido-anime-server/internal/service"
 )
 
 func main() {
 	config.InitConfig()
+
 	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
 
-	gin.SetMode(config.NewConfig().Server.GinMode)
+	gin.SetMode(config.GetConfig().Server.GinMode)
 	engine := gin.Default()
 	router := engine.Group("")
 	api.InitRouter(router)
 
-	init := factory.NewInitService()
+	init := service.NewInitService()
 	init.Init()
 
 	if err := engine.Run(fmt.Sprintf("%s:%d", "localhost", config.Conf.Server.Port)); err != nil {
