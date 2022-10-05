@@ -17,12 +17,13 @@ func NewMiddleware() *Middleware {
 }
 
 func (this *Middleware) Auth() gin.HandlerFunc {
+	const CODE = 401
 	return func(ctx *gin.Context) {
 
 		// token为空
 		token := ctx.GetHeader("token")
 		if token == "" {
-			response.Bad(ctx, "未登录")
+			response.Custom(ctx, CODE, "用户未登录", nil)
 			ctx.Abort()
 			return
 		}
@@ -30,7 +31,7 @@ func (this *Middleware) Auth() gin.HandlerFunc {
 		// token不存在
 		user, ok := global.TokenCache[token]
 		if !ok {
-			response.Bad(ctx, "非法token")
+			response.Custom(ctx, CODE, "token不存在", nil)
 			ctx.Abort()
 			return
 		}
@@ -39,7 +40,7 @@ func (this *Middleware) Auth() gin.HandlerFunc {
 		// token 过期
 		if user.TokenTime+this.conf.Server.TokenExpirationTime < nowUnix {
 			delete(global.TokenCache, token)
-			response.Bad(ctx, "token已失效,请重新登录")
+			response.Custom(ctx, CODE, "token已失效,请重新登录", nil)
 			ctx.Abort()
 			return
 		}
