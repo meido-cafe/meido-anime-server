@@ -58,3 +58,19 @@ func (this *BangumiRepo) Search(name string, class int) (ret model.BangumiSearch
 	}
 	return
 }
+
+func (this *BangumiRepo) GetSubjectCharacters(id int) (ret []model.BangumiSubjectCharacter, err error) {
+	res, err := this.client.R().
+		SetPathParam("id", strconv.Itoa(id)).
+		SetResult(&ret).
+		Get("/v0/subjects/{id}/characters")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if res.IsError() {
+		log.Printf("[获取番剧角色信息失败] [code] %d [response] %s\n", res.StatusCode, res.String())
+		return
+	}
+	return
+}

@@ -44,9 +44,10 @@ func InitRouter(router *gin.RouterGroup) {
 		r.PUT("category", api.UpdateVideoCategory) // 更改分类
 	}
 	{
-		r := b.Group("bangumi")            // /api/v1/bangumi
-		r.GET("calendar", api.GetCalendar) // 获取新番日历
-		r.GET("subject", api.GetSubject)   // 获取番剧详细信息
-		r.GET("search", api.Search)        // 搜索番剧
+		r := b.Group("bangumi")                               // /api/v1/bangumi
+		r.GET("calendar", api.GetCalendar)                    // 获取新番日历
+		r.GET("subject", api.GetSubject)                      // 获取番剧详细信息
+		r.GET("search", api.Search)                           // 搜索番剧
+		r.GET("subject/characters", api.GetSubjectCharacters) // 获取番剧的角色信息
 	}
 }

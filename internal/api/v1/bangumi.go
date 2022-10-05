@@ -54,3 +54,24 @@ func (this *Api) Search(ctx *gin.Context) {
 	}
 	response.List(ctx, search, total)
 }
+
+func (this *Api) GetSubjectCharacters(ctx *gin.Context) {
+	req := vo.GetSubjectCharactersRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+
+	if req.Id == 0 {
+		response.Bad(ctx, "bangumi id 不能为空")
+		return
+	}
+
+	res, err := this.service.GetSubjectCharacters(req.Id)
+	if err != nil {
+		response.Error(ctx, "获取角色信息失败")
+		return
+	}
+
+	response.List(ctx, res, len(res))
+}

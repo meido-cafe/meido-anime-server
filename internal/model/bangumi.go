@@ -121,3 +121,30 @@ type BangumiSearchSubjectResponse struct {
 	Results int                        `json:"results"`
 	List    []BangumiSearchSubjectItem `json:"list"`
 }
+
+type BangumiSubjectCharacter struct {
+	Images struct {
+		Small  string `json:"small"`
+		Grid   string `json:"grid"`
+		Large  string `json:"large"`
+		Medium string `json:"medium"`
+	} `json:"images"`
+	Name     string `json:"name"`
+	Relation string `json:"relation"`
+	Actors   []struct {
+		Images struct {
+			Small  string `json:"small"`
+			Grid   string `json:"grid"`
+			Large  string `json:"large"`
+			Medium string `json:"medium"`
+		} `json:"images"`
+		Name         string   `json:"name"`
+		ShortSummary string   `json:"short_summary"`
+		Career       []string `json:"career"`
+		Id           int      `json:"id"`
+		Type         int      `json:"type"`
+		Locked       bool     `json:"locked"`
+	} `json:"actors"`
+	Type int `json:"type"`
+	Id   int `json:"id"`
+}

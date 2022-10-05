@@ -25,3 +25,7 @@ func (this *Service) Search(name string, class int) (ret []model.BangumiSearchSu
 	total = searchRet.Results
 	return
 }
+
+func (this *Service) GetSubjectCharacters(id int) (ret []model.BangumiSubjectCharacter, err error) {
+	return this.bangumi.GetSubjectCharacters(id)
+}
