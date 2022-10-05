@@ -16,7 +16,7 @@ type GetRssMiaknInfoResponse struct {
 }
 
 type GetRssSearchRequest struct {
-	SubjectName string `from:"subject_name" json:"subject_name"`
+	SubjectName string `form:"subject_name" json:"subject_name"`
 }
 
 type GetRssSearchResponse struct {

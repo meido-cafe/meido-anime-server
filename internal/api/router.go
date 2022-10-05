@@ -23,7 +23,7 @@ func InitRouter(router *gin.RouterGroup) {
 		r := b.Group("rss")                   // /api/v1/rss
 		r.GET("info/mikan", api.GetMikanInfo) // 获取mikan的番剧信息
 		r.GET("search", api.GetSearch)        // 获取mikan的搜索rss
-		r.GET("subject", api.GetSubject)      // 根据mikan的ID与字幕组ID获取rss
+		r.GET("subject", api.GetRssSubject)   // 根据mikan的ID与字幕组ID获取rss
 	}
 	{
 		r := b.Group("category")              // /api/v1/category
