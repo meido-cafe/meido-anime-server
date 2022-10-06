@@ -2,6 +2,7 @@ package service
 
 import (
 	"meido-anime-server/internal/model"
+	"meido-anime-server/internal/model/vo"
 )
 
 func (this *Service) GetCalendar() (ret []model.BangumiCalendar, total int, err error) {
@@ -28,4 +29,12 @@ func (this *Service) Search(name string, class int) (ret []model.BangumiSearchSu
 
 func (this *Service) GetSubjectCharacters(id int) (ret []model.BangumiSubjectCharacter, err error) {
 	return this.bangumi.GetSubjectCharacters(id)
+}
+
+func (this *Service) GetIndex(request vo.GetIndexRequest) (ret model.BangumiIndexResponse, err error) {
+	ret, err = this.bangumi.GetIndex(request.Sort, request.Type, request.Page, request.Year, request.Month)
+	if err != nil {
+		return
+	}
+	return
 }

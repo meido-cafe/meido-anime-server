@@ -74,3 +74,20 @@ func (this *BangumiRepo) GetSubjectCharacters(id int) (ret []model.BangumiSubjec
 	}
 	return
 }
+
+func (this *BangumiRepo) GetIndex(sort string, t string, page int, year int, month int) (ret model.BangumiIndexResponse, err error) {
+	//https://bangumi.tv/anime/browser/{type}/airtime/{year}-{month}?sort=&page=
+	//var class string
+	//if t != "" {
+	//	class = t + "/"
+	//}
+	//baseUrl := `https://bangumi.tv/anime/browser`
+	//if t != "" {
+	//	baseUrl += "/" + t
+	//}
+	//if year > 0 {
+	//
+	//}
+	//url := fmt.Sprintf("https://bangumi.tv/anime/browser/?sort=%s&page=%d", sort, page)
+	return
+}

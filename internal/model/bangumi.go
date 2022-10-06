@@ -148,3 +148,16 @@ type BangumiSubjectCharacter struct {
 	Type int `json:"type"`
 	Id   int `json:"id"`
 }
+
+type BangumiIndexItem struct {
+	Total    int    // 总集数
+	Rank     int    // 排名
+	Rat      int    // 评分
+	PlayTime int    // 放送时间
+	Title    string // 标题
+	Cover    string // 封面图
+}
+type BangumiIndexResponse struct {
+	Items     BangumiIndexItem `json:"items"`      // 番剧
+	TotalPage int              `json:"total_page"` // 总页数
+}

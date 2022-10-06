@@ -85,6 +85,7 @@ func (this *Api) Subscribe(ctx *gin.Context) {
 	exist, err := this.service.GetOne(vo.VideoGetOneRequest{
 		BangumiId: req.BangumiId,
 	})
+
 	if err != nil {
 		response.Error(ctx, "订阅失败")
 		return

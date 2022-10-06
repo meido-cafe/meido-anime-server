@@ -15,6 +15,30 @@ func (this *Api) GetCalendar(ctx *gin.Context) {
 	response.List(ctx, calendarList, total)
 }
 
+func (this *Api) GetIndex(ctx *gin.Context) {
+	req := vo.GetIndexRequest{}
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.BadBind(ctx)
+		return
+	}
+
+	switch {
+	case req.Sort != "" && req.Sort != "rank" && req.Sort != "date" && req.Sort != "title":
+		response.Bad(ctx, "不支持的排序方式")
+		return
+	case req.Type != "" && req.Type != "tv" && req.Type != "web" && req.Type != "ova" && req.Type != "movie":
+		response.Bad(ctx, "不支持的番剧类型")
+		return
+	}
+
+	index, err := this.service.GetIndex(req)
+	if err != nil {
+		response.Error(ctx, "获取番剧索引失败")
+		return
+	}
+
+	response.Data(ctx, index)
+}
 func (this *Api) GetSubject(ctx *gin.Context) {
 	req := vo.GetSubjectRequest{}
 	if err := ctx.ShouldBind(&req); err != nil {

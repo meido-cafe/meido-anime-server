@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"errors"
 	"log"
 	"meido-anime-server/internal/model"
 	"meido-anime-server/internal/model/vo"
@@ -75,11 +74,6 @@ func (this *Repo) CategoryUpdateName(ctx context.Context, id int64, name string)
 }
 
 func (this *Repo) VideoSelectOne(ctx context.Context, id int64, bangumiId int64, title string) (res model.Video, err error) {
-	if id <= 0 && bangumiId <= 0 {
-		err = errors.New("参数错误")
-		log.Println(err)
-		return
-	}
 	q := tool.NewQuery()
 	sql := ` 
 select 
