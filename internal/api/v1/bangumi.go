@@ -26,9 +26,6 @@ func (this *Api) GetIndex(ctx *gin.Context) {
 	case req.Sort != "" && req.Sort != "rank" && req.Sort != "date" && req.Sort != "title":
 		response.Bad(ctx, "不支持的排序方式")
 		return
-	case req.Type != "" && req.Type != "tv" && req.Type != "web" && req.Type != "ova" && req.Type != "movie":
-		response.Bad(ctx, "不支持的番剧类型")
-		return
 	}
 
 	index, err := this.service.GetIndex(req)

@@ -40,6 +40,7 @@ jobs:
 
           source: "${{ env.DOCKER_NAME }}.tar"
           target: ${{ env.REMOTE_DOCKER_DIR }}
+          overwrite: true
           rm: true
 
 

@@ -32,7 +32,9 @@ func (this *Service) GetSubjectCharacters(id int) (ret []model.BangumiSubjectCha
 }
 
 func (this *Service) GetIndex(request vo.GetIndexRequest) (ret model.BangumiIndexResponse, err error) {
-	ret, err = this.bangumi.GetIndex(request.Sort, request.Type, request.Page, request.Year, request.Month)
+	limit := request.PageSize
+	offset := (request.Page - 1) * request.PageSize
+	ret, err = this.bangumi.GetIndex(limit, offset, request.GetIndexRequestBody)
 	if err != nil {
 		return
 	}

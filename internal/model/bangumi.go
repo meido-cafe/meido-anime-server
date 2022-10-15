@@ -150,14 +150,23 @@ type BangumiSubjectCharacter struct {
 }
 
 type BangumiIndexItem struct {
-	Total    int    // 总集数
-	Rank     int    // 排名
-	Rat      int    // 评分
-	PlayTime int    // 放送时间
-	Title    string // 标题
-	Cover    string // 封面图
+	Date   string `json:"date"`
+	Image  string `json:"image"`
+	Name   string `json:"name"`
+	NameCn string `json:"name_cn"`
+	Tags   []struct {
+		Name  string `json:"name"`
+		Count int    `json:"count"`
+	} `json:"tags"`
+	Score   float64 `json:"score"`
+	Id      int     `json:"id"`
+	Rank    int     `json:"rank"`
+	Summary string  `json:"summary"`
 }
+
 type BangumiIndexResponse struct {
-	Items     BangumiIndexItem `json:"items"`      // 番剧
-	TotalPage int              `json:"total_page"` // 总页数
+	Data   []BangumiIndexItem `json:"data"`   // 番剧
+	Total  int                `json:"total"`  //总条数
+	Limit  int                `json:"limit"`  //当前展示
+	Offset int                `json:"offset"` // 偏移量
 }

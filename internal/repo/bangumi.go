@@ -5,6 +5,7 @@ import (
 	"log"
 	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/model"
+	"meido-anime-server/internal/model/vo"
 	"strconv"
 )
 
@@ -75,19 +76,24 @@ func (this *BangumiRepo) GetSubjectCharacters(id int) (ret []model.BangumiSubjec
 	return
 }
 
-func (this *BangumiRepo) GetIndex(sort string, t string, page int, year int, month int) (ret model.BangumiIndexResponse, err error) {
-	//https://bangumi.tv/anime/browser/{type}/airtime/{year}-{month}?sort=&page=
-	//var class string
-	//if t != "" {
-	//	class = t + "/"
-	//}
-	//baseUrl := `https://bangumi.tv/anime/browser`
-	//if t != "" {
-	//	baseUrl += "/" + t
-	//}
-	//if year > 0 {
-	//
-	//}
-	//url := fmt.Sprintf("https://bangumi.tv/anime/browser/?sort=%s&page=%d", sort, page)
+func (this *BangumiRepo) GetIndex(limit, offset int, body vo.GetIndexRequestBody) (ret model.BangumiIndexResponse, err error) {
+
+	r := this.client.R().SetBodyJsonMarshal(body).SetResult(&ret)
+	if limit > 0 {
+		r.SetQueryParam("limit", strconv.Itoa(limit))
+	}
+	if offset > 0 {
+		r.SetQueryParam("offset", strconv.Itoa(offset))
+	}
+
+	res, err := r.Post("/v0/search/subjects")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if res.IsError() {
+		log.Printf("[获取番剧索引失败] [code] %d [response] %s\n", res.StatusCode, res.String())
+		return
+	}
 	return
 }
