@@ -45,7 +45,7 @@ func InitRouter(router *gin.RouterGroup) {
 	}
 	{
 		r := b.Group("bangumi")                               // /api/v1/bangumi
-		r.GET("index", api.GetIndex)                          // 番剧索引
+		r.POST("index", api.GetIndex)                         // 番剧索引
 		r.GET("calendar", api.GetCalendar)                    // 获取新番日历
 		r.GET("subject", api.GetSubject)                      // 获取番剧详细信息
 		r.GET("search", api.Search)                           // 搜索番剧
