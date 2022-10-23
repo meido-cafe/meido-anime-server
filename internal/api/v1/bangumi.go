@@ -22,10 +22,13 @@ func (this *Api) GetIndex(ctx *gin.Context) {
 		return
 	}
 
-	switch {
-	case req.Sort != "" && req.Sort != "rank" && req.Sort != "date" && req.Sort != "title":
-		response.Bad(ctx, "不支持的排序方式")
-		return
+	if req.Sort != "" {
+		switch req.Sort {
+		case "date", "title", "rating", "rank":
+		default:
+			response.Bad(ctx, "不支持的排序方式")
+			return
+		}
 	}
 
 	index, err := this.service.GetIndex(req)
