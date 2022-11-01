@@ -5,5 +5,3 @@ import (
 )
 
 var TokenCache = make(map[string]*model.User)
-
-const Salt = "me1d0@nlm1"

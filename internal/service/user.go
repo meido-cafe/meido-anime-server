@@ -13,13 +13,13 @@ import (
 )
 
 func (this *Service) Login(req vo.LoginRequest, user model.User) (token string, err error) {
-	md5Username := tool.MD5Salt(os.Getenv("USERNAME"), global.Salt, 1)
+	md5Username := tool.MD5(os.Getenv("USERNAME"))
 	if req.Username != md5Username {
 		err = errors.New("用户名或密码错误")
 		return
 	}
 
-	md5pwd := tool.MD5Salt(os.Getenv("PASSWORD"), global.Salt, 2)
+	md5pwd := tool.MD5(os.Getenv("PASSWORD"))
 	if req.Password != md5pwd {
 		err = errors.New("用户名或密码错误")
 		return
