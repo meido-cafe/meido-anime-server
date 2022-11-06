@@ -43,3 +43,18 @@ create table if not exists category
     create_time INTEGER default 0  not null,
     update_time INTEGER default 0  not null
 );
+
+create table if not exists rule
+(
+    id               INTEGER
+    constraint rule_pk
+    primary key autoincrement,
+    name             TEXT    default '' not null,
+    must_contain     TEXT    default '' not null,
+    must_not_contain TEXT    default '' not null,
+    use_regex        INTEGER default 2  not null,
+    episode_filter   TEXT    default '' not null,
+    smart_filter     INTEGER default 2  not null,
+    create_time      INTEGER default 0  not null,
+    update_time      INTEGER default 0  not null
+);

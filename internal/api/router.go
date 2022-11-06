@@ -51,4 +51,11 @@ func InitRouter(router *gin.RouterGroup) {
 		r.GET("search", api.Search)                           // 搜索番剧
 		r.GET("subject/characters", api.GetSubjectCharacters) // 获取番剧的角色信息
 	}
+	{
+		r := b.Group("rule")           // /api/v1/rule
+		r.GET("list", api.GetRuleList) // 获取QB规则列表
+		r.DELETE("", api.DeleteRule)   // 批量删除规则
+		r.POST("", api.AddRuleList)    // 批量添加规则
+		r.PUT("", api.UpdateRule)      // 更新规则
+	}
 }

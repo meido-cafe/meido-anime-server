@@ -32,3 +32,14 @@ type Cagetory struct {
 	Origin int64  `json:"origin" db:"origin"` // 分类来源 1为内置 2为自定义
 	Time
 }
+
+type Rule struct {
+	Id             int64  `json:"id" db:"id"`                             //
+	Name           string `json:"name" db:"name"`                         // 名称
+	MustContain    string `json:"must_contain" db:"must_contain"`         // 必须包含
+	MustNotContain string `json:"must_not_contain" db:"must_not_contain"` // 必须不包含
+	UseRegex       int    `json:"use_regex" db:"use_regex"`               // 正则表达式 1:true 2:false 默认2
+	EpisodeFilter  string `json:"episode_filter" db:"episode_filter"`     // 剧集过滤
+	SmartFilter    int    `json:"smart_filter" db:"smart_filter"`         // 智能剧集过滤 1:true 2:false 默认2
+	Time
+}
