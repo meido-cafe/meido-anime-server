@@ -10,7 +10,7 @@ func (this *Service) GetRuleList() (res []model.Rule, err error) {
 }
 
 func (this *Service) DeleteRule(req vo.DeleteRuleRequest) (err error) {
-	return this.repo.RuleDeleteOne(req.ID)
+	return this.repo.RuleDeleteList(req.ID)
 }
 
 func (this *Service) AddRuleList(req vo.AddRuleListRequest) (err error) {

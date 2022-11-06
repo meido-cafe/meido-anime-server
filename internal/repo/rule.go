@@ -44,6 +44,7 @@ func (this *Repo) RuleUpdateOne(data model.Rule) (err error) {
 update rule
 set name=?,
     must_contain=?,
+    must_not_contain=?,
     use_regex=?,
     episode_filter=?,
     smart_filter=?,
@@ -51,7 +52,6 @@ set name=?,
 where id = ?;
 `
 	if _, err = this.db.Exec(sql,
-		data.Id,
 		data.Name,
 		data.MustContain,
 		data.MustNotContain,
@@ -59,6 +59,7 @@ where id = ?;
 		data.EpisodeFilter,
 		data.SmartFilter,
 		data.UpdateTime,
+		data.Id,
 	); err != nil {
 		log.Println(err)
 		return
@@ -66,11 +67,12 @@ where id = ?;
 
 	return
 }
-func (this *Repo) RuleDeleteOne(id int64) (err error) {
-	sql := `
-delete from rule where id = ?;
-`
-	if _, err = this.db.Exec(sql, id); err != nil {
+func (this *Repo) RuleDeleteList(id []int64) (err error) {
+	q := tool.NewQuery()
+	q.Add(id)
+	sql := `delete from rule where id in ` + this.sql.FormatList(len(id))
+
+	if _, err = this.db.Exec(sql, q.Values()...); err != nil {
 		log.Println(err)
 		return
 	}

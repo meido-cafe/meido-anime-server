@@ -20,6 +20,12 @@ func (this *Api) DeleteRule(ctx *gin.Context) {
 		response.BadBind(ctx)
 		return
 	}
+
+	if len(req.ID) == 0 {
+		response.Error(ctx, "ID列表不能为空")
+		return
+	}
+
 	if err := this.service.DeleteRule(req); err != nil {
 		response.Error(ctx, "删除规则失败")
 		return
@@ -32,9 +38,21 @@ func (this *Api) AddRuleList(ctx *gin.Context) {
 		response.BadBind(ctx)
 		return
 	}
+	if len(req.Rule) == 0 {
+		response.Bad(ctx, "规则列表不能为空")
+		return
+	}
 
+	nameSet := make(map[string]struct{})
 	nameList := make([]string, 0, len(req.Rule))
+
 	for _, item := range req.Rule {
+		if _, ok := nameSet[item.Name]; ok {
+			response.Bad(ctx, "规则名称不能重复")
+			return
+		}
+		nameSet[item.Name] = struct{}{}
+
 		if item.UseRegex < 1 || item.UseRegex > 2 {
 			response.Bad(ctx, "use_regex 不支持的类型")
 			return
@@ -70,6 +88,11 @@ func (this *Api) UpdateRule(ctx *gin.Context) {
 	var req vo.UpdateRuleRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		response.BadBind(ctx)
+		return
+	}
+
+	if req.Id == 0 {
+		response.Bad(ctx, "id不能为空")
 		return
 	}
 
