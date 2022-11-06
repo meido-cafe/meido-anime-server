@@ -18,7 +18,6 @@ func (this *Service) AddRuleList(req vo.AddRuleListRequest) (err error) {
 	data := make([]model.Rule, 0, len(req.Rule))
 	for _, item := range req.Rule {
 		data = append(data, model.Rule{
-			Id:             item.Id,
 			Name:           item.Name,
 			MustContain:    item.MustContain,
 			MustNotContain: item.MustNotContain,

@@ -97,7 +97,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 	defer stmt.Close()
 
 	for _, item := range data {
-		if _, err = stmt.Exec(sql,
+		if _, err = stmt.Exec(
 			item.Name,
 			item.MustContain,
 			item.MustNotContain,
