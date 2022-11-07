@@ -68,6 +68,32 @@ func InitQB() {
 			}
 		}
 
+		res, err = qb.Client.R().Get("/rss/items")
+		if err != nil {
+			log.Fatalln("qbittorrent 获取rss文件夹失败:", err)
+		}
+		if res.IsError() {
+			log.Fatalln("qbittorrent 获取rss文件夹失败:", res.String())
+		}
+
+		folderMap := make(map[string]any)
+		if err = json.Unmarshal([]byte(res.String()), &folderMap); err != nil {
+			log.Fatalln("qbittorrent 序列化rss目录结果失败", err)
+		}
+
+		if _, ok := folderMap[global.RssFolder]; !ok {
+			res, err = qb.Client.R().SetQueryParams(map[string]string{
+				"path": global.RssFolder,
+			}).Get("/rss/addFolder")
+
+			if err != nil {
+				log.Fatalln("qbittorrent 创建rss文件夹失败")
+			}
+			if res.IsError() {
+				log.Fatalln("qbittorrent 创建rss文件夹失败")
+			}
+		}
+
 		log.Println("qbittorrent 连接成功")
 	})
 }

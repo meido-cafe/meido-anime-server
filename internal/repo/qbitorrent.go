@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"meido-anime-server/internal/common"
+	"meido-anime-server/internal/global"
 	"strings"
 )
 
@@ -65,15 +66,15 @@ func (q Qbittorrent) DeleteRule(ctx context.Context, ruleName string) (err error
 func (q Qbittorrent) AddRss(ctx context.Context, rss string, name string) (err error) {
 	ret, err := q.qb.Client.R().SetQueryParams(map[string]string{
 		"url":  rss,
-		"path": name,
+		"path": global.RssFolder + "/" + name,
 	}).Get("/rss/addFeed")
 	if err != nil {
-		log.Println(err)
+		log.Println("qbittorrent订阅rss失败: ", err)
 		return err
 	}
 	if ret.IsError() {
 		err = fmt.Errorf("%s", ret.String())
-		log.Println(err)
+		log.Println("qbittorrent订阅rss失败: ", err)
 		return
 	}
 	return

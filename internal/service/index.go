@@ -34,14 +34,12 @@ func (this *Service) transaction(ctx context.Context, fn func(repo *repo.Repo) e
 		return
 	}
 	defer func() {
-		if ret.TxError == nil && ret.Error != nil {
-			ret.TxError = tx.Rollback()
-		}
+		ret.TxError = tx.Rollback()
 	}()
 	re := repo.NewRepo(tx)
 
 	if funcErr := fn(re); funcErr != nil {
-		ret.Error = err
+		ret.Error = funcErr
 		return
 	}
 

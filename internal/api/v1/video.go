@@ -109,7 +109,7 @@ func (this *Api) Subscribe(ctx *gin.Context) {
 		return
 	}
 
-	if err := this.service.Subscribe(req); err != nil {
+	if err = this.service.Subscribe(req); err != nil {
 		response.Error(ctx, "订阅失败")
 		return
 	}
