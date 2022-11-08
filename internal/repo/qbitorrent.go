@@ -41,6 +41,7 @@ func (q Qbittorrent) SetRule(ctx context.Context, data map[string]string) (err e
 		log.Println(err)
 		return err
 	}
+
 	if ret.IsError() {
 		err = fmt.Errorf("%s", ret.String())
 		log.Println(err)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/robfig/cron"
 	"log"
+	"meido-anime-server/config"
+	"meido-anime-server/internal/common"
 	"meido-anime-server/internal/global"
 	"meido-anime-server/internal/tool"
 	"path/filepath"
@@ -29,6 +31,7 @@ func (this *CronService) Start() {
 	list := []cronFunc{
 		this.handleVideoLink,
 		this.handleClearDir,
+		this.handleQbittorrentLogin,
 	}
 
 	if err := this.register(list...); err != nil {
@@ -62,7 +65,10 @@ func (this *CronService) register(list ...cronFunc) (err error) {
 
 func (this *CronService) handleVideoLink() producer {
 	return producer{"0 */10 * * * ?", func() {
-		this.service.Link()
+		if err := this.service.Link(); err != nil {
+			log.Println(err)
+			return
+		}
 	}}
 }
 
@@ -87,4 +93,24 @@ func (this *CronService) handleClearDir() producer {
 			}(filepath.Join(global.MediaPath, item.Name))
 		}
 	}}
+}
+
+func (this *CronService) handleQbittorrentLogin() producer {
+	return producer{"0 */30 * * * ?", func() {
+		qb := common.GetQB()
+		res, err := qb.Client.R().SetFormDataAnyType(map[string]interface{}{
+			"username": config.Conf.QB.Username,
+			"password": config.Conf.QB.Password,
+		}).Post("/auth/login")
+		if err != nil {
+			log.Println("[qbittorrent登录失败]:", err)
+			return
+		}
+		if res.IsError() {
+			log.Println("[qbittorrent登录失败]:", res.String())
+			return
+		}
+		return
+	}}
+
 }
